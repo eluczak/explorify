@@ -3,6 +3,7 @@ server <- function(input, output) {
   library(jsonlite)
   library(ggplot2)
   library(dplyr)
+  library(tidyr)
   # line below is used for getting English weekdays' names
   Sys.setlocale("LC_TIME", "C")
   
@@ -233,8 +234,25 @@ server <- function(input, output) {
   })
   
   temp1 <- dataset[ which( as.POSIXct(substr(dataset$endTime,1,10), format = "%Y-%m-%d") == as.character( temp[temp$x == max(temp$x),1] ) ), ]
+  
   output$top_artist_day_max_mins_played <- renderPrint({
     cat( names(sort(table(temp1$artistName), decreasing=TRUE)[1]) )
+  })
+  
+  # top x % most frequently listened artists
+  proportion_of_artists <- 0.87
+  temp2 <- dataset
+  top_tracks <- names(sort(table( paste(temp2$trackName,temp2$artistName, sep=";;;") ), decreasing=TRUE))
+  temp2 <- as.data.frame(head(top_tracks, (length(top_tracks) * proportion_of_artists)))
+  temp2 <- temp2 %>% 
+    separate('head(top_tracks, (length(top_tracks) * proportion_of_artists))', into = c("track", "artist"), sep = ";;;")
+  
+  output$count_of_top_artists <- renderPrint({
+    cat(length(table(temp2$artist )))
+  })
+  
+  output$percent_of_top_artists <- renderPrint({
+    cat(proportion_of_artists*100)
   })
 
 }
