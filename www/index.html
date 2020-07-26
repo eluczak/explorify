@@ -177,14 +177,6 @@
 <body>
   <div class="sidebar dummy">
 		<p>Limit to the date range <br>(default: ever)</p>
-		<input type="radio">
-		<label>last week</label><br>
-		<input type="radio">
-		<label>last month</label><br>
-		<input type="radio">
-		<label>ever</label><br>
-		<input type="radio">
-		<label>date range:</label>
 		<p><input type="text" name="date_start" placeholder="start date YYYY-MM-DD"></p>
 		<p><input type="text" name="date_end" placeholder="end date YYYY-MM-DD"></p>
 		<hr>
@@ -207,9 +199,10 @@
 		<p class="dummy">Report is limited to songs only, excluding podcasts.</p>
 	</div>
 	<div class="coloured">
+    <p><span id="message_no_data" class="shiny-text-output"></span></p>   
 		<p>Date range: <span id="start_date" class="shiny-text-output"></span> to <span id="end_date" class="shiny-text-output"></span></p>
 		<p><span id="num_of_tracks" class="shiny-text-output"></span> listenings</p>
-		<p><span id="total_min_played" class="shiny-text-output"></span> minutes played</p>
+		<p><span id="total_hours_played" class="shiny-text-output"></span> hours played</p>
 		<p class="dummy">XX genres</p>
 		<table>
 			<tr>

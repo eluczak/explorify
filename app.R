@@ -7,131 +7,185 @@ server <- function(input, output) {
   # line below is used for getting English weekdays' names
   Sys.setlocale("LC_TIME", "C")
   
-  # to do: sanitizing the input
+  # to do: sanitize the input
+  clean <- function(input)
+  {
+    
+  }
+  # to do: check if the data is correct
+  
+  # checking if date matches YYYY-MM-DD pattern
+  date_check <- function(date)
+  {
+    grepl("^\\d{4}-\\d{2}-\\d{2}$", date)
+  }
 
   # reading the data
   # to do: read multiple files and join them
   original_data <- fromJSON("www/data/StreamingHistory0.json", simplifyVector = TRUE)
-  dataset <- original_data
   
-  # to do: check if the data is correct
-  
-  # including only tracks which were played longer than 0.5 min
-  dataset <- dataset[ which(dataset$msPlayed/60000>0.5), ]
-  
-  # subsetting to a specific date range
-  date_start <- "YYYY-MM-DD"
-  date_end <- "YYYY-MM-DD"
-  #dataset <- dataset[ which( as.POSIXct(substr(dataset$endTime,1,10), format = "%Y-%m-%d") <= "date_end" ), ]
-  
-  # preparing fields
-  dataset$minPlayed <- round(dataset$msPlayed/60000, 2)
-  dataset$year <- substr(dataset$endTime, 1, 4)
-  dataset$month <- substr(dataset$endTime, 6, 7)
-  dataset$day <- substr(dataset$endTime, 9, 10)
-  dataset$hour <- substr(dataset$endTime, 12, 13)
-  dataset$min <- substr(dataset$endTime, 15, 16)
-  dataset$weekday <- weekdays(as.POSIXct(dataset$endTime, format = "%Y-%m-%d %H:%M"))
-  dataset$artistName <- dataset$artistName
-  dataset$trackName <- dataset$trackName
-  # to do: get genre and other tracks' features via Spotify API
+  # some transformations of data
+  # `d` stands for `dataset`
+  d <- reactive({
+    dataset <- original_data
+    # subsetting to a specific date range
+    if( date_check(input$date_start) ) 
+    {
+      dataset <- dataset[which(as.POSIXct(substr(dataset$endTime,1,10), format = "%Y-%m-%d") >= 
+                                       as.POSIXct(substr(input$date_start,1,10), format = "%Y-%m-%d")), ]
+    }
+    if( date_check(input$date_end) ) 
+    {
+      dataset <- dataset[which(as.POSIXct(substr(dataset$endTime,1,10), format = "%Y-%m-%d") <= 
+                                 as.POSIXct(substr(input$date_end,1,10), format = "%Y-%m-%d")), ]
+    }
+    
+    # including only tracks which were played longer than 0.5 min
+    dataset <- dataset[ which(dataset$msPlayed/60000>0.5), ]
+    
+    # preparing fields
+    dataset$minPlayed <- round(dataset$msPlayed/60000, 2)
+    dataset$year <- substr(dataset$endTime, 1, 4)
+    dataset$month <- substr(dataset$endTime, 6, 7)
+    dataset$day <- substr(dataset$endTime, 9, 10)
+    dataset$hour <- substr(dataset$endTime, 12, 13)
+    dataset$min <- substr(dataset$endTime, 15, 16)
+    dataset$weekday <- weekdays(as.POSIXct(dataset$endTime, format = "%Y-%m-%d %H:%M"))
+    dataset$artistName <- dataset$artistName
+    dataset$trackName <- dataset$trackName
+    # to do: get genre and other tracks' features via Spotify API
+    
+    # the line below should be the added as a last line of this function - otherwise it won't work properly
+    # maybe the function should return a default value, rather than conditional instructions
+    dataset <- dataset
+  })
   
   # to do: correctness check after transformation (I am not sure if it is necessary though)
   
-  # quick summary 
+  output$message_no_data <- renderPrint({
+    if(length(d()$endTime) == 0 )
+    {
+      cat("There is no listening data for that period.")
+    }
+  })
   
   output$num_of_tracks <- renderPrint({
-    cat(length(dataset$endTime))
+    cat(length(d()$endTime))
   })
   
   output$start_date <- renderPrint({
-    cat( substr(min(dataset$endTime),1,10) )
+    if( length(d()$endTime)>0 )
+    {
+      cat( substr(min(d()$endTime),1,10) )
+    }
+    else
+    {
+      cat("")
+    }
   })
 
   output$end_date <- renderPrint({
-    cat( substr(max(dataset$endTime),1,10) )
+    if( length(d()$endTime)>0 )
+    {
+      cat( substr(max(d()$endTime),1,10) )
+    }
+    else
+    {
+      cat("")
+    }
   })
   
-  output$total_min_played <- renderPrint({
-    cat( round(sum(dataset$minPlayed),0) )
+  output$total_hours_played <- renderPrint({
+    cat( round((sum(d()$minPlayed)/60),1) )
   })
   
   # to do: make following lines non-repeatable 
   output$top_artist_1 <- renderPrint({
-    cat( names(sort(table(dataset$artistName), decreasing=TRUE)[1]) )
+    cat( names(sort(table(d()$artistName), decreasing=TRUE)[1]) )
   })
   
   output$top_artist_2 <- renderPrint({
-    cat( names(sort(table(dataset$artistName), decreasing=TRUE)[2]) )
+    cat( names(sort(table(d()$artistName), decreasing=TRUE)[2]) )
   })
   
   output$top_artist_3 <- renderPrint({
-    cat( names(sort(table(dataset$artistName), decreasing=TRUE)[3]) )
+    cat( names(sort(table(d()$artistName), decreasing=TRUE)[3]) )
   })
   
   output$top_artist_4 <- renderPrint({
-    cat( names(sort(table(dataset$artistName), decreasing=TRUE)[4]) )
+    cat( names(sort(table(d()$artistName), decreasing=TRUE)[4]) )
   })
   
   output$top_artist_5 <- renderPrint({
-    cat( names(sort(table(dataset$artistName), decreasing=TRUE)[5]) )
+    cat( names(sort(table(d()$artistName), decreasing=TRUE)[5]) )
   })
   
   output$top_artist_6 <- renderPrint({
-    cat( names(sort(table(dataset$artistName), decreasing=TRUE)[6]) )
+    cat( names(sort(table(d()$artistName), decreasing=TRUE)[6]) )
   })
   
   # to do: make following lines non-repeatable
-  top_tracks <- names(sort(table( paste(dataset$trackName,dataset$artistName, sep=";") ), decreasing=TRUE))
   # title of most played song
   output$top_track_title_1 <- renderPrint({
+    top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
     cat( sub(";.*", "", top_tracks[1]) )
   })
   output$top_track_title_2 <- renderPrint({
+    top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
     cat( sub(";.*", "", top_tracks[2]) )
   })
   output$top_track_title_3 <- renderPrint({
+    top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
     cat( sub(";.*", "", top_tracks[3]) )
   })
   output$top_track_title_4 <- renderPrint({
+    top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
     cat( sub(";.*", "", top_tracks[4]) )
   })
   output$top_track_title_5 <- renderPrint({
+    top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
     cat( sub(";.*", "", top_tracks[5]) )
   })
   output$top_track_title_6 <- renderPrint({
+    top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
     cat( sub(";.*", "", top_tracks[6]) )
   })
   # artist of most played song
   output$top_track_artist_1 <- renderPrint({
+    top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
     cat( sub(".*;", "", top_tracks[1]) )
   })
   output$top_track_artist_2 <- renderPrint({
+    top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
     cat( sub(".*;", "", top_tracks[2]) )
   })
   output$top_track_artist_3 <- renderPrint({
+    top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
     cat( sub(".*;", "", top_tracks[3]) )
   })
   output$top_track_artist_4 <- renderPrint({
+    top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
     cat( sub(".*;", "", top_tracks[4]) )
   })
   output$top_track_artist_5 <- renderPrint({
+    top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
     cat( sub(".*;", "", top_tracks[5]) )
   })
   output$top_track_artist_6 <- renderPrint({
+    top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
     cat( sub(".*;", "", top_tracks[6]) )
   })
   
   output$longest_track_duration <- renderPrint({
-    cat( round(max(dataset$minPlayed),0) )
+    cat( round(max(d()$minPlayed),0) )
   })
   
   output$longest_track_name <- renderPrint({
-    cat(dataset[dataset$minPlayed == max(dataset$minPlayed),"trackName"])
+    cat(d()[d()$minPlayed == max(d()$minPlayed),"trackName"])
   })
   
   output$longest_track_artist <- renderPrint({
-    cat(dataset[dataset$minPlayed == max(dataset$minPlayed),"artistName"])
+    cat(d()[d()$minPlayed == max(d()$minPlayed),"artistName"])
   })
   
   # average minutes played in hour
@@ -181,11 +235,11 @@ server <- function(input, output) {
   }
   
   output$plot_avg_mins_played <- renderPlot({
-    draw_plot_avg_mins_played(dataset, title="every weekday")
+    draw_plot_avg_mins_played(d(), title="every weekday")
   })
   
   output$plot_total_tracks_per_hour <- renderPlot({
-    dataframe <- data.frame(endTime = as.POSIXct(dataset$endTime, format = "%Y-%m-%d %H:%M"), hour = as.integer(dataset$hour))
+    dataframe <- data.frame(endTime = as.POSIXct(d()$endTime, format = "%Y-%m-%d %H:%M"), hour = as.integer(d()$hour))
     
     ggplot(dataframe, aes(x = hour)) + 
       geom_histogram(bins = 24, colour = "#f7f7f7", fill="#67eb33") + 
@@ -199,11 +253,11 @@ server <- function(input, output) {
   })
 
   output$hour_max_tracks_played <- renderPrint({
-    cat( names(sort(table(dataset$hour), decreasing=TRUE)[1]) )
+    cat( names(sort(table(d()$hour), decreasing=TRUE)[1]) )
   })
   
   output$plot_total_tracks_per_weekday <- renderPlot({
-    dataframe <- data.frame(endTime = dataset$endTime, weekday = dataset$weekday)
+    dataframe <- data.frame(endTime = d()$endTime, weekday = d()$weekday)
     dataframe$weekday <- factor(dataframe$weekday, 
                                 levels= rev(c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")))
     ggplot(dataframe, aes(x = weekday)) + 
@@ -219,39 +273,43 @@ server <- function(input, output) {
   })
   
   output$weekday_max_tracks_played <- renderPrint({
-    cat( names(sort(table(dataset$weekday), decreasing=TRUE)[1]) )
+    cat( names(sort(table(d()$weekday), decreasing=TRUE)[1]) )
   })
   
-  temp <- data.frame( min_played = dataset$minPlayed, day = as.factor(substr(dataset$endTime,1,10)) )
-  temp <- aggregate(temp$min_played, list(temp$day), sum)
-  
+  #to do: make following functions non-repeatable
   output$day_max_mins_played <- renderPrint({
+    temp <- data.frame( min_played = d()$minPlayed, day = as.factor(substr(d()$endTime,1,10)) )
+    temp <- aggregate(temp$min_played, list(temp$day), sum)
     cat(as.character( temp[temp$x == max(temp$x),1] ))
   })
   
   output$max_hours_played_per_day <- renderPrint({
+    temp <- data.frame( min_played = d()$minPlayed, day = as.factor(substr(d()$endTime,1,10)) )
+    temp <- aggregate(temp$min_played, list(temp$day), sum)
     cat(round( (temp[temp$x == max(temp$x),2]/60),1))
   })
   
-  temp1 <- dataset[ which( as.POSIXct(substr(dataset$endTime,1,10), format = "%Y-%m-%d") == as.character( temp[temp$x == max(temp$x),1] ) ), ]
-  
   output$top_artist_day_max_mins_played <- renderPrint({
+    temp <- data.frame( min_played = d()$minPlayed, day = as.factor(substr(d()$endTime,1,10)) )
+    temp <- aggregate(temp$min_played, list(temp$day), sum)
+    temp1 <- d()[ which( as.POSIXct(substr(d()$endTime,1,10), format = "%Y-%m-%d") == as.character( temp[temp$x == max(temp$x),1] ) ), ]
     cat( names(sort(table(temp1$artistName), decreasing=TRUE)[1]) )
   })
   
   # top x % most frequently listened artists
-  proportion_of_artists <- 0.87
-  temp2 <- dataset
-  top_tracks <- names(sort(table( paste(temp2$trackName,temp2$artistName, sep=";;;") ), decreasing=TRUE))
-  temp2 <- as.data.frame(head(top_tracks, (length(top_tracks) * proportion_of_artists)))
-  temp2 <- temp2 %>% 
-    separate('head(top_tracks, (length(top_tracks) * proportion_of_artists))', into = c("track", "artist"), sep = ";;;")
-  
   output$count_of_top_artists <- renderPrint({
+    proportion_of_artists <- 0.87
+    temp2 <- d()
+    top_tracks <- names(sort(table( paste(temp2$trackName,temp2$artistName, sep=";;;") ), decreasing=TRUE))
+    temp2 <- as.data.frame(head(top_tracks, (length(top_tracks) * proportion_of_artists)))
+    temp2 <- temp2 %>% 
+      separate('head(top_tracks, (length(top_tracks) * proportion_of_artists))', into = c("track", "artist"), sep = ";;;")
+    
     cat(length(table(temp2$artist )))
   })
   
   output$percent_of_top_artists <- renderPrint({
+    proportion_of_artists <- 0.87
     cat(proportion_of_artists*100)
   })
 
