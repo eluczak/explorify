@@ -12,10 +12,11 @@ server <- function(input, output) {
   {
     
   }
-  # to do: check if the data is correct
+  
+  # to do: check if received data is correct
   
   # checking if date matches YYYY-MM-DD pattern
-  date_check <- function(date)
+  check_date <- function(date)
   {
     grepl("^\\d{4}-\\d{2}-\\d{2}$", date)
   }
@@ -27,14 +28,16 @@ server <- function(input, output) {
   # some transformations of data
   # `d` stands for `dataset`
   d <- reactive({
+    
     dataset <- original_data
+    
     # subsetting to a specific date range
-    if( date_check(input$date_start) ) 
+    if( check_date(input$date_start) ) 
     {
       dataset <- dataset[which(as.POSIXct(substr(dataset$endTime,1,10), format = "%Y-%m-%d") >= 
                                        as.POSIXct(substr(input$date_start,1,10), format = "%Y-%m-%d")), ]
     }
-    if( date_check(input$date_end) ) 
+    if( check_date(input$date_end) ) 
     {
       dataset <- dataset[which(as.POSIXct(substr(dataset$endTime,1,10), format = "%Y-%m-%d") <= 
                                  as.POSIXct(substr(input$date_end,1,10), format = "%Y-%m-%d")), ]
@@ -43,7 +46,7 @@ server <- function(input, output) {
     # including only tracks which were played longer than 0.5 min
     dataset <- dataset[ which(dataset$msPlayed/60000>0.5), ]
     
-    # preparing fields
+    # preparing columns
     dataset$minPlayed <- round(dataset$msPlayed/60000, 2)
     dataset$year <- substr(dataset$endTime, 1, 4)
     dataset$month <- substr(dataset$endTime, 6, 7)
@@ -55,18 +58,9 @@ server <- function(input, output) {
     dataset$trackName <- dataset$trackName
     # to do: get genre and other tracks' features via Spotify API
     
-    # the line below should be the added as a last line of this function - otherwise it won't work properly
-    # maybe the function should return a default value, rather than conditional instructions
-    dataset <- dataset
-  })
-  
-  # to do: correctness check after transformation (I am not sure if it is necessary though)
-  
-  output$message_no_data <- renderPrint({
-    if(length(d()$endTime) == 0 )
-    {
-      cat("There is no listening data for that period.")
-    }
+    # correctness check after transformation
+    req( length(dataset$endTime) > 0 )
+    return(dataset)
   })
   
   output$num_of_tracks <- renderPrint({
@@ -74,27 +68,13 @@ server <- function(input, output) {
   })
   
   output$start_date <- renderPrint({
-    if( length(d()$endTime)>0 )
-    {
-      cat( substr(min(d()$endTime),1,10) )
-    }
-    else
-    {
-      cat("")
-    }
+    cat( substr(min(d()$endTime),1,10) )
   })
 
   output$end_date <- renderPrint({
-    if( length(d()$endTime)>0 )
-    {
-      cat( substr(max(d()$endTime),1,10) )
-    }
-    else
-    {
-      cat("")
-    }
+    cat( substr(max(d()$endTime),1,10) )
   })
-  
+
   output$total_hours_played <- renderPrint({
     cat( round((sum(d()$minPlayed)/60),1) )
   })
@@ -176,7 +156,7 @@ server <- function(input, output) {
     cat( sub(".*;", "", top_tracks[6]) )
   })
   
-  output$longest_track_duration <- renderPrint({
+  output$longest_track_min_played <- renderPrint({
     cat( round(max(d()$minPlayed),0) )
   })
   
@@ -222,8 +202,6 @@ server <- function(input, output) {
     ggplot(dataframe, aes(x = hour, y = avg_mins_played)) +
       geom_point() +
       geom_line(colour="#67eb33") +
-      #geom_point(colour = "#f7f7f7", fill="#67eb33") +
-      #coord_polar(start = 0) + 
       theme_minimal() +
       ylim(c(0,60))+
       theme(panel.grid.minor.x = element_blank()) +
@@ -251,7 +229,7 @@ server <- function(input, output) {
       theme(panel.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7")) +
       scale_x_continuous(breaks = seq(-0.5,22.5), labels = seq(0,23))
   })
-
+  
   output$hour_max_tracks_played <- renderPrint({
     cat( names(sort(table(d()$hour), decreasing=TRUE)[1]) )
   })
