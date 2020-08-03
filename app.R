@@ -4,6 +4,10 @@ server <- function(input, output) {
   library(ggplot2)
   library(dplyr)
   library(tidyr)
+  library(shinyjs)
+  
+  useShinyjs(html = TRUE)
+  
   # line below is used for getting English weekdays' names
   Sys.setlocale("LC_TIME", "C")
   
@@ -58,9 +62,18 @@ server <- function(input, output) {
     dataset$trackName <- dataset$trackName
     # to do: get genre and other tracks' features via Spotify API
     
-    # correctness check after transformation
-    req( length(dataset$endTime) > 0 )
     return(dataset)
+  })
+  
+  observe({
+    if( length(d()$endTime) > 0 )
+    {
+      shinyjs::show("report_area")
+    }
+    else
+    {
+      shinyjs::hide("report_area")
+    }
   })
   
   output$num_of_tracks <- renderPrint({
