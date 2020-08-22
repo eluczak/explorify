@@ -1,10 +1,31 @@
 server <- function(input, output) {
   # imports and some general settings
+  library(httr)
   library(jsonlite)
   library(ggplot2)
   library(dplyr)
   library(tidyr)
   library(shinyjs)
+  library(spotifyr)
+  
+  # uncomment and populate following 2 variables with your Spotify API credentials
+  # Sys.setenv(SPOTIFY_CLIENT_ID = '')
+  # Sys.setenv(SPOTIFY_CLIENT_SECRET = '')
+  
+  clientID = Sys.getenv("SPOTIFY_CLIENT_ID")
+  secret = Sys.getenv("SPOTIFY_CLIENT_SECRET")
+  
+  response = POST(
+    'https://accounts.spotify.com/api/token',
+    accept_json(),
+    authenticate(clientID, secret),
+    body = list(grant_type = 'client_credentials'),
+    encode = 'form',
+    verbose()
+  )
+  mytoken = content(response)$access_token
+  HeaderValue = paste0('Bearer ', mytoken)
+  
   
   useShinyjs(html = TRUE)
   
@@ -75,6 +96,38 @@ server <- function(input, output) {
       shinyjs::hide("report_area")
     }
   })
+  
+  
+  get_top_genre <- function(place)
+  {
+    # argument `place` determines which element should be returned (1st, 2nd etc.)
+
+    num_of_top_artists <- 20
+    top_artists_names <- names(sort(table(d()$artistName), decreasing=TRUE)[1:num_of_top_artists])
+    top_artists_ids <- character()
+    top_genres <- data.frame(genres=character())
+    
+    for (i in 1:length(top_artists_names))
+    {
+      artist_name <- top_artists_names[i]
+      artist_data <- search_spotify(artist_name, type="artist")
+      artist_data <- head(artist_data[artist_data$name==artist_name,], 1)
+      top_artists_ids <- c(top_artists_ids, artist_data$id)
+    }
+    
+    for (i in 1:length(top_artists_ids))
+    {
+      URI <- paste0('https://api.spotify.com/v1/artists/', top_artists_ids[i])
+      response2 <- GET(url=URI, add_headers(Authorization = HeaderValue))
+      response2 <- content(response2)
+      top_genres <- rbind(top_genres, data.frame(genres=unlist(response2$genres)))
+    }
+    
+    top_genres <- sort(table(top_genres), decreasing = TRUE)
+    top_genres <- as.data.frame(top_genres, stringsAsFactors = FALSE)
+    cat( (top_genres[place,1]) )
+  }
+  
   
   output$num_of_tracks <- renderPrint({
     cat(length(d()$endTime))
@@ -167,6 +220,27 @@ server <- function(input, output) {
   output$top_track_artist_6 <- renderPrint({
     top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
     cat( sub(".*;", "", top_tracks[6]) )
+  })
+
+  # to do: make following lines non-repeatable
+  # it should return an array instead of string
+  output$top_genre_1 <- renderPrint({
+    get_top_genre(1)
+  })
+  output$top_genre_2 <- renderPrint({
+    get_top_genre(2)
+  })
+  output$top_genre_3 <- renderPrint({
+    get_top_genre(3)
+  })
+  output$top_genre_4 <- renderPrint({
+    get_top_genre(4)
+  })
+  output$top_genre_5 <- renderPrint({
+    get_top_genre(5)
+  })
+  output$top_genre_6 <- renderPrint({
+    get_top_genre(6)
   })
   
   output$longest_track_min_played <- renderPrint({

@@ -234,16 +234,19 @@
 			</tr>
 		</table>
 	</div>
-	<div class="coloured indented dummy">
+	<div class="coloured indented">
 		<p>Top genres</p>
 		<!-- to do: make following lines non-repeatable -->
-		<p><progress value="89" max="100"></progress><b> A </b>89%</p>
-		<p><progress value="77" max="100"></progress><b>  B </b>77%</p>
-		<p><progress value="62" max="100"></progress><b> C </b>62%</p>
-		<p><progress value="56" max="100"></progress><b> D </b>56%</p>
-		<p><progress value="33" max="100"></progress><b> E </b>33%</p>
-		<p><progress value="16" max="100"></progress><b> F </b>16%</p>
-		<p><progress value="9" max="100"></progress><b> G </b>9%</p>
+		<span id="top_genres_table">
+      <script>
+        var x ="", i;
+        for (i=1; i<=6; i++)
+        {
+          x = x+ "<p><b><span id=\"top_genre_"+i+"\" class=\"shiny-text-output\"></span></b></p>";
+        }
+        document.getElementById("top_genres_table").innerHTML = x;
+      </script>
+    </span>
 	</div>
 	<div class="coloured">
 		<h2>You listened the most at <span id="hour_max_tracks_played" class="shiny-text-output"></span></h2>
