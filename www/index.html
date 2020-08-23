@@ -192,8 +192,13 @@
 	<div class="coloured">
 		<h1>Your Spotify listening stats</h1>
 		<p>Upload JSON file obtained from Spotify website: </p>
-		<input  class="dummy" type="text" name="upload" placeholder="Select file">
-		<p  class="dummy">Your report is ready, scroll down to see it.<br>You can also change a scope of the report in a menu on the left.</p>
+		<form method="post" enctype="multipart/form-data">
+      <div>
+        <label for="file">Choose file to upload</label>
+        <input type="file" name="file" accept="application/JSON">
+      </div>
+    </form>
+		<p>After upload please wait a while. It may take up to one minute to load.<br>You can change a scope of the report in a menu on the left.</p>
 		<br>
 		<p>Don't have data yet and just want to see the app in action? Here is a <a href="#"  class="dummy">demo</a></p>
 		<p>Only tracks that were played longer than 0.5 min will be included in the analysis, in order to avoid taking into account accidentally played songs.</p>

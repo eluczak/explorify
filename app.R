@@ -48,13 +48,21 @@ server <- function(input, output) {
 
   # reading the data
   # to do: read multiple files and join them
-  original_data <- fromJSON("www/data/StreamingHistory0.json", simplifyVector = TRUE)
+  # original_data <- fromJSON("www/data/StreamingHistory0.json", simplifyVector = TRUE)
+  
+  original_data <- reactive({
+    req(input$file)
+    path <- input$file
+    path <- path$datapath
+    original_data <- fromJSON(path, simplifyVector = TRUE)
+    return(original_data)
+   })
   
   # some transformations of data
   # `d` stands for `dataset`
   d <- reactive({
     
-    dataset <- original_data
+    dataset <- original_data()
     
     # subsetting to a specific date range
     if( check_date(input$date_start) ) 
@@ -86,16 +94,16 @@ server <- function(input, output) {
     return(dataset)
   })
   
-  observe({
-    if( length(d()$endTime) > 0 )
-    {
-      shinyjs::show("report_area")
-    }
-    else
-    {
-      shinyjs::hide("report_area")
-    }
-  })
+  # observe({
+  #   if( length(d()$endTime) > 0 )
+  #   {
+  #     shinyjs::show("report_area")
+  #   }
+  #   else
+  #   {
+  #     shinyjs::hide("report_area")
+  #   }
+  # })
   
   
   get_top_genre <- function(place)
