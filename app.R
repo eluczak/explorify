@@ -35,13 +35,10 @@ server <- function(input, output) {
   # line below is used for getting English weekdays' names
   Sys.setlocale("LC_TIME", "C")
   
-  # to do: sanitize the input
   clean <- function(input)
   {
     
   }
-  
-  # to do: check if received data is correct
   
   # checking if date matches YYYY-MM-DD pattern
   check_date <- function(date)
@@ -50,7 +47,6 @@ server <- function(input, output) {
   }
 
   # reading the data
-  # to do: read multiple files and join them
   # original_data <- fromJSON("www/data/StreamingHistory0.json", simplifyVector = TRUE)
   
   original_data <- reactive({
@@ -92,7 +88,6 @@ server <- function(input, output) {
     dataset$weekday <- weekdays(as.POSIXct(dataset$endTime, format = "%Y-%m-%d %H:%M"))
     dataset$artistName <- dataset$artistName
     dataset$trackName <- dataset$trackName
-    # to do: get genre and other tracks' features via Spotify API
     
     return(dataset)
   })
@@ -197,7 +192,7 @@ server <- function(input, output) {
     cat( round((sum(d()$minPlayed)/60),1) )
   })
   
-  # to do: make following lines non-repeatable 
+
   output$top_artist_1 <- renderPrint({
     cat( names(sort(table(d()$artistName), decreasing=TRUE)[1]) )
   })
@@ -222,7 +217,7 @@ server <- function(input, output) {
     cat( names(sort(table(d()$artistName), decreasing=TRUE)[6]) )
   })
   
-  # to do: make following lines non-repeatable
+
   # title of most played song
   output$top_track_title_1 <- renderPrint({
     top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
@@ -274,7 +269,7 @@ server <- function(input, output) {
     cat( sub(".*;", "", top_tracks[6]) )
   })
 
-  # to do: make following lines non-repeatable
+
   # it should return an array instead of string
   output$top_genre_1 <- renderPrint({
     get_top_genre(1)
@@ -393,7 +388,6 @@ server <- function(input, output) {
     cat( names(sort(table(d()$weekday), decreasing=TRUE)[1]) )
   })
   
-  #to do: make following functions non-repeatable
   output$day_max_mins_played <- renderPrint({
     temp <- data.frame( min_played = d()$minPlayed, day = as.factor(substr(d()$endTime,1,10)) )
     temp <- aggregate(temp$min_played, list(temp$day), sum)
