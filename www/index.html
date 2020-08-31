@@ -195,7 +195,7 @@
 		<form method="post" enctype="multipart/form-data">
       <div>
         <label for="file">Choose file to upload</label>
-        <input type="file" name="file" accept="application/JSON">
+        <input type="file" id="file" accept="application/JSON">
       </div>
     </form>
 		<p>After upload please wait a while. It may take up to one minute to load.<br>You can change a scope of the report in a menu on the left.</p>
@@ -274,22 +274,11 @@
 		<p style="padding-top: 50px;"><b><span id="percent_of_top_artists" class="shiny-text-output"></span>%</b> of all the tracks you have played most often come from 
 		<b><span id="count_of_top_artists" class="shiny-text-output"></span></b> artists.</p>
 	</div>
-	<div class="coloured dummy">
-		<h2>What are the songs you listen to?</h2>
-		<p><b>89%</b> of your tracks are <span class="highlighted">danceable</span></p>
-		<p><b>78%</b> of your tracks are of <span class="highlighted">high energy</span></p>
-		<p><b>61%</b> of your tracks are considered <span class="highlighted">positive</span></p>
-		<p><b>60%</b> of vocals are <span class="highlighted">male</span></p>
-		<p>Their average tempo is XX beats per minute.</p>
-	</div>
-	<div class="coloured indented dummy">
-		<h2>And your top 50 most played songs are...</h2>
-		<p><b>79%</b> of them are perceived quite <span class="highlighted">loud</span></p>
-		<p><b>61%</b> of them are considered <span class="highlighted">positive</span></p>
-		<p><b>48%</b> of them are of <span class="highlighted">high energy</span></p>
-		<p>Most common genre: <span class="highlighted">brit pop</span></p>
-		<p><b>80%</b> of vocals are <span class="highlighted">male</span></p>
-		<p>Their average tempo is XX beats per minute.</p>
+	<div class="coloured">
+		<h2>Audio features of songs you listened most frequently</h2>
+		<div id="plot_audio_features" class="shiny-plot-output"></div>
+		<p class="dummy"><b>60%</b> of vocals are <span class="highlighted">male</span></p>
+		<p class="dummy">Average tempo: XX beats per minute.</p>
 	</div>
 	<div class="dummy coloured">
 		<h2>How your [artist|genre] preferences evolve through time</h2>

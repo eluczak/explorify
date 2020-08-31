@@ -1,5 +1,8 @@
 server <- function(input, output) {
   # imports and some general settings
+  
+  # options(shiny.trace = TRUE)
+  # options(shiny.fullstacktrace = TRUE)
   library(httr)
   library(jsonlite)
   library(ggplot2)
@@ -136,7 +139,48 @@ server <- function(input, output) {
     cat( (top_genres[place,1]) )
   }
   
+  draw_plot_audio_features <- function(songs_and_artists)
+  {
+    audio_features <- data.frame("danceability"=double(), "energy"=double(),"loudness"=double(),
+                                 "speechiness"=double(), "acousticness"=double(),
+                                 "instrumentalness"=double(), "valence"=double(), "tempo"=double())
+    for (i in 1:6)
+    {
+      artist_name <- songs_and_artists$artistName[i]
+      song_name <- songs_and_artists$trackName[i]
+
+      artist_data <- search_spotify(artist_name, type="artist")
+      artist_data <- head(artist_data[artist_data$name==artist_name,], 1)
+      # maybe i should use pipe here, to do: check it
+      artist_audio_features <- get_artist_audio_features(artist_data$id)
+      artist_audio_features <- artist_audio_features[artist_audio_features$track_name==song_name,]
+      artist_audio_features <- head(artist_audio_features[ c("danceability", "energy", "acousticness",
+                                                             "instrumentalness", "valence", "tempo") ],1)
+      audio_features <- rbind(audio_features, artist_audio_features)
+    }
+
+    audio_features <- as.data.frame(as.list(apply(audio_features, 2, mean)))
+    audio_features <- audio_features[,c(1:5)]
+    audio_features <- data.frame(features=colnames(audio_features), values=unlist(audio_features[1,], use.names=FALSE))
+    audio_features <- audio_features[order(-audio_features$values),]
+
+    # ordering values on a plot
+    audio_features$features <- factor(audio_features$features, levels=audio_features$features)
+
+    audio_features_plot <- ggplot(data=audio_features, aes(x=features, y=values) ) +
+      geom_col(position="dodge") +
+      ylim(0,1) +
+      xlab("") +
+      ylab("") +
+      theme_minimal() +
+      theme(panel.grid.minor.x = element_blank()) +
+      theme(panel.grid.major.x = element_blank()) +
+      theme(plot.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7"))
+
+    return(audio_features_plot)
+  }
   
+
   output$num_of_tracks <- renderPrint({
     cat(length(d()$endTime))
   })
@@ -384,6 +428,14 @@ server <- function(input, output) {
   output$percent_of_top_artists <- renderPrint({
     proportion_of_artists <- 0.87
     cat(proportion_of_artists*100)
+  })
+  
+  output$plot_audio_features <- renderPlot({
+    top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
+    top_artists <- sub(".*;", "", top_tracks)
+    top_tracks <- sub(";.*", "", top_tracks)
+    songs_and_artists <- data.frame(trackName=top_tracks, artistName=top_artists, stringsAsFactors = FALSE)
+    draw_plot_audio_features(songs_and_artists)
   })
 
 }
