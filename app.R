@@ -163,11 +163,12 @@ server <- function(input, output) {
     audio_features$features <- factor(audio_features$features, levels=audio_features$features)
 
     audio_features_plot <- ggplot(data=audio_features, aes(x=features, y=values) ) +
-      geom_col(position="dodge") +
+      geom_col(position="dodge", colour="plum", fill="plum") +
       ylim(0,1) +
       xlab("") +
       ylab("") +
       theme_minimal() +
+      ggtitle("Audio features of songs you listened most frequently") +
       theme(panel.grid.minor.x = element_blank()) +
       theme(panel.grid.major.x = element_blank()) +
       theme(plot.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7"))
@@ -246,27 +247,42 @@ server <- function(input, output) {
   # artist of most played song
   output$top_track_artist_1 <- renderPrint({
     top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
-    cat( sub(".*;", "", top_tracks[1]) )
+    cat( paste(" - ", sub(".*;", "", top_tracks[1])) )
   })
   output$top_track_artist_2 <- renderPrint({
     top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
-    cat( sub(".*;", "", top_tracks[2]) )
+    cat( paste(" - ", sub(".*;", "", top_tracks[2])) )
   })
   output$top_track_artist_3 <- renderPrint({
     top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
-    cat( sub(".*;", "", top_tracks[3]) )
+    cat( paste(" - ", sub(".*;", "", top_tracks[3])) )
   })
   output$top_track_artist_4 <- renderPrint({
     top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
-    cat( sub(".*;", "", top_tracks[4]) )
+    cat( paste(" - ", sub(".*;", "", top_tracks[4])) )
   })
   output$top_track_artist_5 <- renderPrint({
     top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
-    cat( sub(".*;", "", top_tracks[5]) )
+    cat( paste(" - ", sub(".*;", "", top_tracks[5])) )
   })
   output$top_track_artist_6 <- renderPrint({
     top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
-    cat( sub(".*;", "", top_tracks[6]) )
+    cat( paste(" - ", sub(".*;", "", top_tracks[6])) )
+  })
+  
+  output$text_top_artists <- renderPrint({
+    req(input$file)
+    cat("Top artists")
+  })
+  
+  output$text_top_tracks <- renderPrint({
+    req(input$file)
+    cat("Top tracks")
+  })
+  
+  output$text_top_genres <- renderPrint({
+    req(input$file)
+    cat("Top genres")
   })
 
 
@@ -334,8 +350,9 @@ server <- function(input, output) {
     
     dataframe <- data.frame(avg_mins_played = temp$mean, hour = as.integer(temp$Var1))
     ggplot(dataframe, aes(x = hour, y = avg_mins_played)) +
-      geom_point() +
-      geom_line(colour="#67eb33") +
+      geom_point(colour="navy") +
+      ggtitle("Your average listening time per hour") +
+      geom_line(colour="steelblue") +
       theme_minimal() +
       ylim(c(0,60))+
       theme(panel.grid.minor.x = element_blank()) +
@@ -343,7 +360,8 @@ server <- function(input, output) {
       xlab("hour") +
       theme(plot.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7")) +
       theme(panel.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7")) +
-      scale_x_continuous(breaks = seq(0,23), labels = seq(0,23))
+      scale_x_continuous(breaks = seq(0,23), labels = seq(0,23)) +
+      theme(aspect.ratio = 2/5)
   }
   
   output$plot_avg_mins_played <- renderPlot({
@@ -354,13 +372,14 @@ server <- function(input, output) {
     dataframe <- data.frame(endTime = as.POSIXct(d()$endTime, format = "%Y-%m-%d %H:%M"), hour = as.integer(d()$hour))
     
     ggplot(dataframe, aes(x = hour)) + 
-      geom_histogram(bins = 24, colour = "#f7f7f7", fill="#67eb33") + 
+      ggtitle("How many you have listened at each hour") +
+      geom_histogram(bins = 24, colour = "#f7f7f7", fill="orchid") + 
       coord_polar(start = 0) + 
       theme_minimal() + 
       theme(panel.grid.minor.x = element_blank()) +
-      ylab("Number of tracks") +
-      theme(plot.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7")) +
-      theme(panel.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7")) +
+      ylab("Total number of tracks") +
+      #theme(plot.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7")) +
+      #theme(panel.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7")) +
       scale_x_continuous(breaks = seq(-0.5,22.5), labels = seq(0,23))
   })
   
@@ -373,7 +392,8 @@ server <- function(input, output) {
     dataframe$weekday <- factor(dataframe$weekday, 
                                 levels= rev(c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")))
     ggplot(dataframe, aes(x = weekday)) + 
-      geom_histogram(bins = 7, colour = "#67eb33", fill="#67eb33", stat="count") + 
+      ggtitle("How many you have listened on each day of the week") +
+      geom_histogram(bins = 7, colour = "darkorchid", fill="darkorchid", stat="count") + 
       theme_minimal() + 
       coord_flip() +
       theme(panel.grid.major.x = element_blank()) +
@@ -381,7 +401,8 @@ server <- function(input, output) {
       theme(panel.grid.major.y = element_blank()) +
       theme(axis.title.y = element_blank()) +
       theme(plot.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7")) +
-      ylab("Number of tracks")
+      ylab("Total number of tracks") +
+      theme(aspect.ratio = 1/4)
   })
   
   output$weekday_max_tracks_played <- renderPrint({

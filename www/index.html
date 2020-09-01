@@ -5,53 +5,63 @@
   <script src="shared/jquery.js" type="text/javascript"></script>
   <script src="shared/shiny.js" type="text/javascript"></script>
   <link rel="stylesheet" type="text/css" href="shared/shiny.css"/>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;800&display=swap" rel="stylesheet"> 
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;700&display=swap" rel="stylesheet"> 
   <script src="shinyjs/inject.js"></script>
   <style>
 		p
 		{
-			font-size: 21px;
-			color: black;
+			font-size: 18px;
+			font-family: 'Source Sans Pro';
+			color: darkslategray;
 		}
 
 		label
 		{
 			font-size: 21px;
+			font-family: 'Source Sans Pro';
 			color: black;
 		}
 
 		a
 		{
 			color: #00d2ff;
+			font-family: 'Source Sans Pro';
 			text-decoration: none;
 		}
 
 		body
 		{
-		  font-family: Montserrat, sans-serif;
+		  font-family: 'Source Sans Pro', sans-serif;
 			margin: 0;
 			padding: 0;
 		}
 
 		div
 		{
-			padding: 40px 200px 40px 400px;
+			padding: 40px 300px 40px 400px;
 			margin: 0;
 		}
 
 		h1
 		{
-			color: black;
+			color: mediumpurple;
 			font-size: 55px;
 			font-weight: bold;
-			font-family: serif;
 			font-style: italic;
+			font-family: serif;
 		}
 
 		h2
 		{
-			color: black;
+			color: darkslategray;
 			font-size: 34px;
+			font-weight: normal;
+		}
+		
+		h3
+		{
+			color: darkslategray;
+			font-size: 29px;
 			font-weight: normal;
 		}
 
@@ -162,6 +172,7 @@
 		.dummy
 		{
 		  border: 1px solid red;
+		  display: none;
 		}
 		
 		.shiny-plot-output
@@ -171,16 +182,23 @@
 		  margin-bottom: 100px;
 		  height: 400px;
 		}
+		
 
 	</style>
   <title>Your Spotify listening stats</title>
 </head>
 <body>
-  <div class="sidebar dummy">
-		<p>Limit to the date range <br>(default: ever)</p>
+  <div class="sidebar">
+    <form method="post" enctype="multipart/form-data">
+        <label for="file">upload file here</label><br>
+        <input type="file" id="file" accept="application/JSON">
+    </form>
+    <hr>
+		<p>Limit the date range <br>(default: all time)</p>
 		<p><input type="text" name="date_start" placeholder="start date YYYY-MM-DD"></p>
 		<p><input type="text" name="date_end" placeholder="end date YYYY-MM-DD"></p>
 		<hr>
+		<span class="dummy">
 		<p>Within the selected date range,<br>limit to particular weekdays<br>(default: all week)</p>
 		<input type="radio">
 		<label>all week</label><br>
@@ -188,23 +206,19 @@
 		<label>Monday to Friday</label><br>
 		<input type="radio">
 		<label>weekends</label>
-	</div>
+		</span>
+		</div>
 	<div class="coloured">
 		<h1>Your Spotify listening stats</h1>
-		<p>Upload JSON file obtained from Spotify website: </p>
-		<form method="post" enctype="multipart/form-data">
-      <div>
-        <label for="file">Choose file to upload</label>
-        <input type="file" id="file" accept="application/JSON">
-      </div>
-    </form>
-		<p>After upload please wait a while. It may take up to one minute to load.<br>You can change a scope of the report in a menu on the left.</p>
-		<br>
-		<p>Don't have data yet and just want to see the app in action? Here is a <a href="#"  class="dummy">demo</a></p>
-		<p>Only tracks that were played longer than 0.5 min will be included in the analysis, in order to avoid taking into account accidentally played songs.</p>
+		<h3>Here you can discover your listening habits and music preferences based on your streaming history in Spotify.</h3>
+		<p style="align: justify">To do this you need to request your last year's listening history from Spotify website (you find this option in the privacy settings). Usually after 2 or 3 days the data is available to download and you will receive a set of files containing various information that has been collected. The file we need contains only listening records and is named <i>StreamingHistory0.json</i>.</p>
+		<p style="align: justify">Just upload the file in the field on the left and enjoy!</p>
+		<br><br>
+		<p style="align: justify">NOTE: After upload please wait a while. It may take up to one minute to load. Please also note that tracks that were played shorter than 0.5 min will be excluded of this report to avoid taking into account accidentally played songs.</p>
+		<p class="dummy">Don't have data yet and just want to see the app in action? Here is a <a href="#"  class="dummy">demo</a></p>
 	</div>
 	<span id="report_area">
-	<div class="coloured">
+	<div>
 	  <p>Date range: <span id="start_date" class="shiny-text-output"></span> to <span id="end_date" class="shiny-text-output"></span></p>
 		<p><span id="num_of_tracks" class="shiny-text-output"></span> listenings</p>
 		<p><span id="total_hours_played" class="shiny-text-output"></span> hours played</p>
@@ -212,7 +226,7 @@
 		<table>
 			<tr>
 				<td>
-					<p>Top artists</p>
+					<p><span id="text_top_artists" class="shiny-text-output"></span></p>
           <span id="top_artists_table">
             <script>
               var x ="", i;
@@ -224,12 +238,12 @@
           </span>
 				</td>
 				<td>
-					<p>Top tracks</p>
+					<p><span id="text_top_tracks" class="shiny-text-output"></span></p>
 					<span id="top_tracks_table">
             <script>
               var x ="", i;
               for (i=1; i<=6; i++) {
-                x = x+ "<p class=\"top_"+i+"\"><b><span id=\"top_track_title_"+i+"\" class=\"shiny-text-output\"></span></b> - <span id=\"top_track_artist_"+i+"\" class=\"shiny-text-output\"></span></p>";
+                x = x+ "<p class=\"top_"+i+"\"><b><span id=\"top_track_title_"+i+"\" class=\"shiny-text-output\"></span></b><span id=\"top_track_artist_"+i+"\" class=\"shiny-text-output\"></span></p>";
               }
               document.getElementById("top_tracks_table").innerHTML = x;
             </script>
@@ -239,7 +253,7 @@
 		</table>
 	</div>
 	<div class="coloured indented">
-		<p>Top genres</p>
+	  <p><span id="text_top_genres" class="shiny-text-output"></span></p>
 		<!-- to do: make following lines non-repeatable -->
 		<span id="top_genres_table">
       <script>
@@ -252,20 +266,17 @@
       </script>
     </span>
 	</div>
-	<div class="coloured">
-		<h2>You listened the most at <span id="hour_max_tracks_played" class="shiny-text-output"></span></h2>
+	<div>
 		<div id="plot_total_tracks_per_hour" class="shiny-plot-output"></div>
 	</div>
 	<div class="coloured">
-		<h2>You listened the most on <span id="weekday_max_tracks_played" class="shiny-text-output"></span>s</h2>
 		<div id="plot_total_tracks_per_weekday" class="shiny-plot-output"></div>
 	</div>
 	<div class="coloured">
-		<h2>Your average listening time by hour</h2>
 		<div id="plot_avg_mins_played" class="shiny-plot-output"
        style="width: 100%; height: 300px"></div>
 	</div>
-	<div class="coloured">
+	<div>
 		<p style="padding-top: 50px;">On <span id="day_max_mins_played" class="shiny-text-output"></span>
 		   you had been listening to music for <b><span id="max_hours_played_per_day" class="shiny-text-output"></span></b> hours.<br>
 		   They were mostly <b><span id="top_artist_day_max_mins_played" class="shiny-text-output"></span></b> songs.</p>
@@ -274,7 +285,6 @@
 		<b><span id="count_of_top_artists" class="shiny-text-output"></span></b> artists.</p>
 	</div>
 	<div class="coloured">
-		<h2>Audio features of songs you listened most frequently</h2>
 		<div id="plot_audio_features" class="shiny-plot-output"></div>
 		<p class="dummy"><b>60%</b> of vocals are <span class="highlighted">male</span></p>
 		<p class="dummy">Average tempo: XX beats per minute.</p>
@@ -287,7 +297,7 @@
 		<label>genres</label><br><br>
 		<div class="shiny-plot-output"></div>
 	</div>
-	<div class="coloured">
+	<div class="coloured dummy">
 		<h2>At the end...</h2>
 		<p>And here is a playlist that has been created just for you. It shares similar characteristics with the songs you listened to, but it contains only songs you haven’t listened before.</p>
 		<p  class="dummy">[playlist]</p>
