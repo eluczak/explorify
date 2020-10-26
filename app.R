@@ -284,8 +284,23 @@ server <- function(input, output) {
     req(input$file)
     cat("Top genres")
   })
-
-
+  
+  output$text_date_range <- renderPrint({
+    req(input$file)
+    cat( paste0( "Date range: ",substr(min(d()$endTime),1,10)," to ", substr(max(d()$endTime),1,10) ) )
+  })
+  
+  output$text_num_of_tracks <- renderPrint({
+    req(input$file)
+    cat( paste0( length(d()$endTime), " listenings" ) )
+  })
+  
+  output$text_total_hours_played <- renderPrint({
+    req(input$file)
+    cat( paste0(round((sum(d()$minPlayed)/60),1), " hours played") )
+  })
+  
+  
   # it should return an array instead of string
   output$top_genre_1 <- renderPrint({
     get_top_genre(1)
@@ -317,6 +332,9 @@ server <- function(input, output) {
   output$longest_track_artist <- renderPrint({
     cat(d()[d()$minPlayed == max(d()$minPlayed),"artistName"])
   })
+  
+  
+  
   
   # average minutes played in hour
   draw_plot_avg_mins_played <- function(data, title) {
@@ -372,7 +390,7 @@ server <- function(input, output) {
     dataframe <- data.frame(endTime = as.POSIXct(d()$endTime, format = "%Y-%m-%d %H:%M"), hour = as.integer(d()$hour))
     
     ggplot(dataframe, aes(x = hour)) + 
-      ggtitle("How many you have listened at each hour") +
+      ggtitle("How much you have listened at each hour") +
       geom_histogram(bins = 24, colour = "#f7f7f7", fill="orchid") + 
       coord_polar(start = 0) + 
       theme_minimal() + 
@@ -392,7 +410,7 @@ server <- function(input, output) {
     dataframe$weekday <- factor(dataframe$weekday, 
                                 levels= rev(c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")))
     ggplot(dataframe, aes(x = weekday)) + 
-      ggtitle("How many you have listened on each day of the week") +
+      ggtitle("How much you have listened on each day of the week") +
       geom_histogram(bins = 7, colour = "darkorchid", fill="darkorchid", stat="count") + 
       theme_minimal() + 
       coord_flip() +
@@ -412,13 +430,13 @@ server <- function(input, output) {
   output$day_max_mins_played <- renderPrint({
     temp <- data.frame( min_played = d()$minPlayed, day = as.factor(substr(d()$endTime,1,10)) )
     temp <- aggregate(temp$min_played, list(temp$day), sum)
-    cat(as.character( temp[temp$x == max(temp$x),1] ))
+    cat( paste0("On ", as.character( temp[temp$x == max(temp$x),1] ),"you had been listening to music for " ) )
   })
   
   output$max_hours_played_per_day <- renderPrint({
     temp <- data.frame( min_played = d()$minPlayed, day = as.factor(substr(d()$endTime,1,10)) )
     temp <- aggregate(temp$min_played, list(temp$day), sum)
-    cat(round( (temp[temp$x == max(temp$x),2]/60),1))
+    cat( paste0(round( (temp[temp$x == max(temp$x),2]/60),1), " hours.") )
   })
   
   output$top_artist_day_max_mins_played <- renderPrint({
