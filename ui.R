@@ -1,6 +1,7 @@
 library(shiny)
 
 shinyUI(fluidPage(
+    includeCSS("styles.css"),
     
     fluidRow(
         column(6, offset = 3,
@@ -19,7 +20,11 @@ shinyUI(fluidPage(
     
     fluidRow(
         column(6, offset = 3, wellPanel(
-            
+            fluidRow(
+                column(9, offset = 1,
+                       p(span(class="dummy","Currently uploading multiple files does not work!"))
+                )
+            ),
             fluidRow(
                 column(9, offset = 1,
                        fileInput(
@@ -33,18 +38,18 @@ shinyUI(fluidPage(
             ),
             
             fluidRow(
-                column(3, offset = 1,
+                column(3, offset = 1, class="dummy",
                        dateInput('start_date',
                                  label = 'Select start date (optional)',
                                  value = Sys.Date())),
-                column(3,
+                column(3, class="dummy",
                        dateInput('end_date',
                                  label = 'Select end date (optional)',
                                  value = Sys.Date()))
             ),
             
             fluidRow(
-                column(2, offset = 10,
+                column(2, offset = 10, class="dummy",
                        actionButton('reset_all',
                                     label = 'reset',
                                     value = 'reset_all'))
@@ -55,17 +60,17 @@ shinyUI(fluidPage(
     fluidRow(
         column(6, offset = 3,
                br(),
-               p(tags$b("28 Dec 2019 - 05 May 2020"), align = "center"))
+               p(class="dummy",tags$b("28 Dec 2019 - 05 May 2020"), align = "center"))
     ),
     
     fluidRow(
-        column(6, offset = 3,
+        column(6, offset = 3, class = "dummy",
                p("Total listening time:",
                  tags$b("3459"),"hours"))
     ),
     
     fluidRow(
-        column(6, offset = 3,
+        column(6, offset = 3, class = "dummy",
                p(tags$b("765"),"listenings"))
     ),
     
@@ -77,15 +82,15 @@ shinyUI(fluidPage(
     ),
     
     fluidRow(
-        column(2, offset = 3,
+        column(2, offset = 3, class = "dummy",
                p(img(src = "images/artist1.png", width = "80%")),
-               p(tags$b("Lana Del Rey")),
+               p(tags$b(span(class="dummy","Lana Del Rey"))),
                p("345 listenings")),
-        column(2,
+        column(2, class = "dummy",
                p(img(src = "images/artist2.png", width = "80%")),
                p(tags$b("ABBA")),
                p("101 listenings")),
-        column(2,
+        column(2, class = "dummy",
                p(img(src = "images/artist3.png", width = "80%")),
                p(tags$b("Radiohead")),
                p("89 listenings"))
@@ -99,15 +104,15 @@ shinyUI(fluidPage(
     ),
     
     fluidRow(
-        column(2, offset = 3,
+        column(2, offset = 3, class = "dummy",
                p(img(src = "images/album1.png", width = "80%")),
                p(tags$b("Piouiyutyr"),br(),"Liquido"),
                p("59 listenings")),
-        column(2,
+        column(2, class = "dummy",
                p(img(src = "images/album2.png", width = "80%")),
                p(tags$b("Ipsum Lorem"),br(),"Pixies"),
                p("10 listenings")),
-        column(2,
+        column(2, class = "dummy",
                p(img(src = "images/album3.png", width = "80%")),
                p(tags$b("Rfasde af oiuyg"),br(),"Liquido"),
                p("8 listenings"))
@@ -121,7 +126,7 @@ shinyUI(fluidPage(
     ),
     
     fluidRow(
-        column(6, offset = 3,
+        column(6, offset = 3, class = "dummy",
                p(img(src = "images/total_listening_time_by_weekday.png", width = "100%")))
     ),
     
@@ -133,9 +138,9 @@ shinyUI(fluidPage(
     ),
     
     fluidRow(
-        column(6, offset = 3,
+        column(6, offset = 3, class = "dummy",
                p(img(src = "images/total_listening_time_by_hour.png", width = "100%"))),
-        column(2,
+        column(2, class = "dummy",
                checkboxInput("hour_plot_monday", "Monday", value = TRUE),
                checkboxInput("hour_plot_tuesday", "Tueday", value = TRUE),
                checkboxInput("hour_plot_wednesday", "Wednesday", value = TRUE),
@@ -155,9 +160,9 @@ shinyUI(fluidPage(
     ),
     
     fluidRow(
-        column(6, offset = 3,
+        column(6, offset = 3, class = "dummy",
                p(img(src = "images/total_listening_time_by_hour.png", width = "100%"))),
-        column(1,
+        column(1, class = "dummy",
                selectInput("month_plot_year", "year", c("all", "2020", "2019", "2018")))
         
     ),
@@ -170,7 +175,7 @@ shinyUI(fluidPage(
     ),
     
     fluidRow(
-        column(6, offset = 3,
+        column(6, offset = 3, class = "dummy",
                p(img(src = "images/genres_plot.png", width = "100%")),
                sliderInput("genres_plot_num_of_songs",
                            "Number of most played songs:",
@@ -187,7 +192,7 @@ shinyUI(fluidPage(
     ),
     
     fluidRow(
-        column(6, offset = 3,
+        column(6, offset = 3, class = "dummy",
                p(img(src = "images/audio_features_spider_plot.png", width = "100%")),
                sliderInput("audio_features_plot_num_of_songs",
                            "Number of most played songs:",
@@ -202,7 +207,7 @@ shinyUI(fluidPage(
     ),
     
     fluidRow(
-        column(5, offset = 3,
+        column(5, offset = 3, class = "dummy",
                br(),
                p("On 27 Feb 2020 you had been listening for a longest time -",
                  tags$b("8.7"),"hours.",
@@ -211,7 +216,7 @@ shinyUI(fluidPage(
     ),
     
     fluidRow(
-        column(5, offset = 5,
+        column(5, offset = 5, class = "dummy",
                br(),
                p("The longest track you listened to, was about",
                  tags$b("15 minutes"),"long.",
@@ -220,7 +225,7 @@ shinyUI(fluidPage(
     ),
     
     fluidRow(
-        column(6, offset = 3,
+        column(6, offset = 3, class = "dummy",
                br(),
                br(),
                br(),
