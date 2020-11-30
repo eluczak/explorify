@@ -1,6 +1,7 @@
 library(shiny)
 
 shinyUI(fluidPage(
+    
     fluidRow(
         column(6, offset = 3,
                h1(tags$b("my Spotify stats")),
@@ -12,19 +13,44 @@ shinyUI(fluidPage(
                    tags$li("Upload the file(s) below and enjoy!")
                ),
                p(tags$b("Note:"),"After upload please wait a while. It may take up to one minute to generate the report."),
-               pre(br(), "upload or drag file(s) here", br()),
                br(),
                br())
     ),
+    
     fluidRow(
-        column(3, offset = 3,   
-               selectInput("scope", "Scope of report:", c("all", "weekends", "weekdays"))
-        ),
-        column(3,
-               dateRangeInput('dateRange',
-                              label = 'Date range:',
-                              start = Sys.Date() - 2, end = Sys.Date() + 2)),
-    ),
+        column(6, offset = 3, wellPanel(
+            
+            fluidRow(
+                column(9, offset = 1,
+                       fileInput(
+                           "input_file",
+                           "Upload file(s)",
+                           multiple = TRUE,
+                           accept = ".json",
+                           buttonLabel = "Browse or drag file(s) here",
+                           placeholder = "No file selected",
+                       )),
+            ),
+            
+            fluidRow(
+                column(3, offset = 1,
+                       dateInput('start_date',
+                                 label = 'Select start date (optional)',
+                                 value = Sys.Date())),
+                column(3,
+                       dateInput('end_date',
+                                 label = 'Select end date (optional)',
+                                 value = Sys.Date()))
+            ),
+            
+            fluidRow(
+                column(2, offset = 10,
+                       actionButton('reset_all',
+                                    label = 'reset',
+                                    value = 'reset_all'))
+            )
+        ))),
+
     
     fluidRow(
         column(6, offset = 3,
@@ -45,6 +71,7 @@ shinyUI(fluidPage(
     
     fluidRow(
         column(6, offset = 3,
+               br(),
                h3("Top artists"),
                hr())
     ),
@@ -66,6 +93,7 @@ shinyUI(fluidPage(
     
     fluidRow(
         column(6, offset = 3,
+               br(),
                h3("Top tracks"),
                hr())
     ),
@@ -87,6 +115,7 @@ shinyUI(fluidPage(
     
     fluidRow(
         column(6, offset = 3,
+               br(),
                h3("Total listening time by day of the week"),
                hr())
     ),
@@ -98,46 +127,73 @@ shinyUI(fluidPage(
     
     fluidRow(
         column(6, offset = 3,
+               br(),
                h3("Total listening time by hour"),
                hr())
     ),
     
     fluidRow(
         column(6, offset = 3,
-               p(img(src = "images/total_listening_time_by_hour.png", width = "100%")))
+               p(img(src = "images/total_listening_time_by_hour.png", width = "100%"))),
+        column(2,
+               checkboxInput("hour_plot_monday", "Monday", value = TRUE),
+               checkboxInput("hour_plot_tuesday", "Tueday", value = TRUE),
+               checkboxInput("hour_plot_wednesday", "Wednesday", value = TRUE),
+               checkboxInput("hour_plot_thursday", "Thursday", value = TRUE),
+               checkboxInput("hour_plot_friday", "Friday", value = TRUE),
+               checkboxInput("hour_plot_saturday", "Saturday", value = TRUE),
+               checkboxInput("hour_plot_sunday", "Sunday", value = TRUE)
+               
+               )
     ),
-    
+
     fluidRow(
         column(6, offset = 3,
+               br(),
                h3("Total listening time by month"),
                hr())
     ),
     
     fluidRow(
         column(6, offset = 3,
-               p(img(src = "images/total_listening_time_by_hour.png", width = "100%")))
+               p(img(src = "images/total_listening_time_by_hour.png", width = "100%"))),
+        column(1,
+               selectInput("month_plot_year", "year", c("all", "2020", "2019", "2018")))
+        
     ),
     
     fluidRow(
         column(6, offset = 3,
+               br(),
                h3("Genres of most played songs"),
                hr())
     ),
     
     fluidRow(
         column(6, offset = 3,
-               p(img(src = "images/genres_plot.png", width = "100%")))
+               p(img(src = "images/genres_plot.png", width = "100%")),
+               sliderInput("genres_plot_num_of_songs",
+                           "Number of most played songs:",
+                           value = 5,
+                           min = 1,
+                           max = 10))
     ),
     
     fluidRow(
         column(6, offset = 3,
+               br(),
                h3("Audio features of most played songs"),
                hr())
     ),
     
     fluidRow(
         column(6, offset = 3,
-               p(img(src = "images/audio_features_spider_plot.png", width = "100%")))
+               p(img(src = "images/audio_features_spider_plot.png", width = "100%")),
+               sliderInput("audio_features_plot_num_of_songs",
+                           "Number of most played songs:",
+                           value = 5,
+                           min = 1,
+                           max = 10))
     ),
     
     fluidRow(
