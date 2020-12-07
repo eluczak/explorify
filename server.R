@@ -218,42 +218,19 @@ shinyServer(function(input, output) {
         top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
         cat( sub(";.*", "", top_tracks[3]) )
     })
-    output$top_track_title_4 <- renderPrint({
-        top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
-        cat( sub(";.*", "", top_tracks[4]) )
-    })
-    output$top_track_title_5 <- renderPrint({
-        top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
-        cat( sub(";.*", "", top_tracks[5]) )
-    })
-    output$top_track_title_6 <- renderPrint({
-        top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
-        cat( sub(";.*", "", top_tracks[6]) )
-    })
+
     # artist of most played song
     output$top_track_artist_1 <- renderPrint({
         top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
-        cat( paste(" - ", sub(".*;", "", top_tracks[1])) )
+        cat( sub(".*;", "", top_tracks[1]) )
     })
     output$top_track_artist_2 <- renderPrint({
         top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
-        cat( paste(" - ", sub(".*;", "", top_tracks[2])) )
+        cat( sub(".*;", "", top_tracks[2]) )
     })
     output$top_track_artist_3 <- renderPrint({
         top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
-        cat( paste(" - ", sub(".*;", "", top_tracks[3])) )
-    })
-    output$top_track_artist_4 <- renderPrint({
-        top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
-        cat( paste(" - ", sub(".*;", "", top_tracks[4])) )
-    })
-    output$top_track_artist_5 <- renderPrint({
-        top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
-        cat( paste(" - ", sub(".*;", "", top_tracks[5])) )
-    })
-    output$top_track_artist_6 <- renderPrint({
-        top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
-        cat( paste(" - ", sub(".*;", "", top_tracks[6])) )
+        cat( sub(".*;", "", top_tracks[3]) )
     })
     
     output$text_top_artists <- renderPrint({

@@ -62,18 +62,18 @@ column(10, offset = 1, class = "main",
 
                    column(2, offset = 2, class = "dummy",
                           p(img(src = "images/artist1.png", width = "80%")),
-                          p(tags$b(span(class="dummy","Lana Del Rey"))),
-                          p("345 listenings")),
+                          p(tags$b(textOutput("top_artist_1", inline = TRUE))),
+                          p("xx listenings")),
 
                    column(2, offset = 1, class = "dummy",
                           p(img(src = "images/artist2.png", width = "80%")),
-                          p(tags$b("ABBA")),
-                          p("101 listenings")),
+                          p(tags$b(textOutput("top_artist_2", inline = TRUE))),
+                          p("xx listenings")),
 
                    column(2, offset = 1, class = "dummy",
                           p(img(src = "images/artist3.png", width = "80%")),
-                          p(tags$b("Radiohead")),
-                          p("89 listenings"))
+                          p(tags$b(textOutput("top_artist_3", inline = TRUE))),
+                          p("xx listenings"))
 
                    ))),
 
@@ -87,18 +87,24 @@ column(10, offset = 1, class = "main",
 
                    column(2, offset = 2, class = "dummy",
                           p(img(src = "images/album1.png", width = "80%")),
-                          p(tags$b("Piouiyutyr"),br(),"Liquido"),
-                          p("59 listenings")),
+                          p(tags$b(textOutput("top_track_title_1", inline = TRUE)),
+                            br(),
+                            textOutput("top_track_artist_1", inline = TRUE)),
+                          p("xx listenings")),
 
                    column(2, offset = 1, class = "dummy",
                           p(img(src = "images/album2.png", width = "80%")),
-                          p(tags$b("Ipsum Lorem"),br(),"Pixies"),
-                          p("10 listenings")),
+                          p(tags$b(textOutput("top_track_title_2", inline = TRUE)),
+                            br(),
+                            textOutput("top_track_artist_2", inline = TRUE)),
+                          p("xx listenings")),
 
                    column(2, offset = 1, class = "dummy",
                           p(img(src = "images/album3.png", width = "80%")),
-                          p(tags$b("Rfasde af oiuyg"),br(),"Liquido"),
-                          p("8 listenings"))
+                          p(tags$b(textOutput("top_track_title_3", inline = TRUE)),
+                            br(),
+                            textOutput("top_track_artist_3", inline = TRUE)),
+                          p("xx listenings"))
 
                    ))),
 
