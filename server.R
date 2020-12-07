@@ -44,12 +44,13 @@ shinyServer(function(input, output) {
         grepl("^\\d{4}-\\d{2}-\\d{2}$", date)
     }
     
-    # reading the data
-    # original_data <- fromJSON("www/data/StreamingHistory0.json", simplifyVector = TRUE)
+
     
+    # reading the data
+
     original_data <- reactive({
-        req(input$file)
-        path <- input$file
+        req(input$input_file)
+        path <- input$input_file
         path <- path$datapath
         original_data <- fromJSON(path, simplifyVector = TRUE)
         return(original_data)
@@ -62,14 +63,14 @@ shinyServer(function(input, output) {
         dataset <- original_data()
         
         # subsetting to a specific date range
-        if( check_date(input$date_start) ) 
+        if( check_date(input$date_start) )
         {
-            dataset <- dataset[which(as.POSIXct(substr(dataset$endTime,1,10), format = "%Y-%m-%d") >= 
+            dataset <- dataset[which(as.POSIXct(substr(dataset$endTime,1,10), format = "%Y-%m-%d") >=
                                          as.POSIXct(substr(input$date_start,1,10), format = "%Y-%m-%d")), ]
         }
-        if( check_date(input$date_end) ) 
+        if( check_date(input$date_end) )
         {
-            dataset <- dataset[which(as.POSIXct(substr(dataset$endTime,1,10), format = "%Y-%m-%d") <= 
+            dataset <- dataset[which(as.POSIXct(substr(dataset$endTime,1,10), format = "%Y-%m-%d") <=
                                          as.POSIXct(substr(input$date_end,1,10), format = "%Y-%m-%d")), ]
         }
         
@@ -89,7 +90,7 @@ shinyServer(function(input, output) {
         
         return(dataset)
     })
-    
+        
     get_top_genre <- function(place)
     {
         # argument `place` determines which element should be returned (1st, 2nd etc.)
