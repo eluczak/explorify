@@ -163,7 +163,7 @@ shinyServer(function(input, output) {
         return(audio_features_plot)
     }
     
-    output$num_of_tracks <- renderPrint({
+    output$num_of_listenings <- renderPrint({
         cat(length(d()$endTime))
     })
     
