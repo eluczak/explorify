@@ -32,22 +32,9 @@ shinyServer(function(input, output) {
     
     # line below is used for getting English weekdays' names
     Sys.setlocale("LC_TIME", "C")
-    
-    clean <- function(input)
-    {
-        
-    }
-    
-    # checking if date matches YYYY-MM-DD pattern
-    check_date <- function(date)
-    {
-        grepl("^\\d{4}-\\d{2}-\\d{2}$", date)
-    }
-    
 
     
     # reading the data
-
     original_data <- reactive({
         req(input$input_file)
         path <- input$input_file
@@ -61,18 +48,6 @@ shinyServer(function(input, output) {
     d <- reactive({
         
         dataset <- original_data()
-        
-        # subsetting to a specific date range
-        if( check_date(input$date_start) )
-        {
-            dataset <- dataset[which(as.POSIXct(substr(dataset$endTime,1,10), format = "%Y-%m-%d") >=
-                                         as.POSIXct(substr(input$date_start,1,10), format = "%Y-%m-%d")), ]
-        }
-        if( check_date(input$date_end) )
-        {
-            dataset <- dataset[which(as.POSIXct(substr(dataset$endTime,1,10), format = "%Y-%m-%d") <=
-                                         as.POSIXct(substr(input$date_end,1,10), format = "%Y-%m-%d")), ]
-        }
         
         # including only tracks which were played longer than 0.5 min
         dataset <- dataset[ which(dataset$msPlayed/60000>0.5), ]

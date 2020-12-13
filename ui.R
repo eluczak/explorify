@@ -43,13 +43,11 @@ column(10, offset = 1, class = "main",
         column(12, class = "",
                fluidRow(
                    column(10, offset = 1, class = "dummy",
-                          h3("Select date range (optionally)"),
-                          hr(),
-                          dateInput('date_start',
-                                    label = 'Start date'),
-                          dateInput('date_end',
-                                    label = 'End date'),
-                          p("to reset, just delete the date you entered"))))),
+                          selectInput("date_range", "Date range",
+                                      c("All time" = "all_time",
+                                        "Last week" = "last_week",
+                                        "Last month" = "last_month",
+                                        "Last year" = "last_year")))))),
 
     fluidRow(
         column(12, class = "dashboard_item",
