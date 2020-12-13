@@ -43,35 +43,33 @@ shinyServer(function(input, output) {
         return(original_data)
     })
     
-    # some transformations of data
-    # `d` stands for `dataset`
-    d <- reactive({
+    # data transformation
+    data <- reactive({
         
-        dataset <- original_data()
+        data <- original_data()
         
-        # including only tracks which were played longer than 0.5 min
-        dataset <- dataset[ which(dataset$msPlayed/60000>0.5), ]
+        # including only tracks which were played longer than a specific time
+        min_allowed_duration = 0.5; # in minutes
+        data <- data[ which(data$msPlayed/60000>min_allowed_duration), ]
         
         # preparing columns
-        dataset$minPlayed <- round(dataset$msPlayed/60000, 2)
-        dataset$year <- substr(dataset$endTime, 1, 4)
-        dataset$month <- substr(dataset$endTime, 6, 7)
-        dataset$day <- substr(dataset$endTime, 9, 10)
-        dataset$hour <- substr(dataset$endTime, 12, 13)
-        dataset$min <- substr(dataset$endTime, 15, 16)
-        dataset$weekday <- weekdays(as.POSIXct(dataset$endTime, format = "%Y-%m-%d %H:%M"))
-        dataset$artistName <- dataset$artistName
-        dataset$trackName <- dataset$trackName
+        data$minPlayed <- round(data$msPlayed/60000, 2)
+        data$year <- substr(data$endTime, 1, 4)
+        data$month <- substr(data$endTime, 6, 7)
+        data$day <- substr(data$endTime, 9, 10)
+        data$hour <- substr(data$endTime, 12, 13)
+        data$min <- substr(data$endTime, 15, 16)
+        data$weekday <- weekdays(as.POSIXct(data$endTime, format = "%Y-%m-%d %H:%M"))
+        data$artistName <- data$artistName
+        data$trackName <- data$trackName
         
-        return(dataset)
+        return(data)
     })
         
-    get_top_genre <- function(place)
+    get_top_genre <- function(place) # 'place' - which item should be returned (1st, 2nd etc.)
     {
-        # argument `place` determines which element should be returned (1st, 2nd etc.)
-        
         num_of_top_artists <- 20
-        top_artists_names <- names(sort(table(d()$artistName), decreasing=TRUE)[1:num_of_top_artists])
+        top_artists_names <- names(sort(table(data()$artistName), decreasing=TRUE)[1:num_of_top_artists])
         top_artists_ids <- character()
         top_genres <- data.frame(genres=character())
         
@@ -139,72 +137,60 @@ shinyServer(function(input, output) {
     }
     
     output$num_of_listenings <- renderPrint({
-        cat(length(d()$endTime))
+        cat(length(data()$endTime))
     })
     
     output$start_date <- renderPrint({
-        cat( substr(min(d()$endTime),1,10) )
+        cat( substr(min(data()$endTime),1,10) )
     })
     
     output$end_date <- renderPrint({
-        cat( substr(max(d()$endTime),1,10) )
+        cat( substr(max(data()$endTime),1,10) )
     })
     
     output$total_hours_played <- renderPrint({
-        cat( round((sum(d()$minPlayed)/60),1) )
+        cat( round((sum(data()$minPlayed)/60),1) )
     })
     
     
     output$top_artist_1 <- renderPrint({
-        cat( names(sort(table(d()$artistName), decreasing=TRUE)[1]) )
+        cat( names(sort(table(data()$artistName), decreasing=TRUE)[1]) )
     })
     
     output$top_artist_2 <- renderPrint({
-        cat( names(sort(table(d()$artistName), decreasing=TRUE)[2]) )
+        cat( names(sort(table(data()$artistName), decreasing=TRUE)[2]) )
     })
     
     output$top_artist_3 <- renderPrint({
-        cat( names(sort(table(d()$artistName), decreasing=TRUE)[3]) )
-    })
-    
-    output$top_artist_4 <- renderPrint({
-        cat( names(sort(table(d()$artistName), decreasing=TRUE)[4]) )
-    })
-    
-    output$top_artist_5 <- renderPrint({
-        cat( names(sort(table(d()$artistName), decreasing=TRUE)[5]) )
-    })
-    
-    output$top_artist_6 <- renderPrint({
-        cat( names(sort(table(d()$artistName), decreasing=TRUE)[6]) )
+        cat( names(sort(table(data()$artistName), decreasing=TRUE)[3]) )
     })
     
     
     # title of most played song
     output$top_track_title_1 <- renderPrint({
-        top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
+        top_tracks <- names(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE))
         cat( sub(";.*", "", top_tracks[1]) )
     })
     output$top_track_title_2 <- renderPrint({
-        top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
+        top_tracks <- names(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE))
         cat( sub(";.*", "", top_tracks[2]) )
     })
     output$top_track_title_3 <- renderPrint({
-        top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
+        top_tracks <- names(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE))
         cat( sub(";.*", "", top_tracks[3]) )
     })
 
     # artist of most played song
     output$top_track_artist_1 <- renderPrint({
-        top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
+        top_tracks <- names(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE))
         cat( sub(".*;", "", top_tracks[1]) )
     })
     output$top_track_artist_2 <- renderPrint({
-        top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
+        top_tracks <- names(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE))
         cat( sub(".*;", "", top_tracks[2]) )
     })
     output$top_track_artist_3 <- renderPrint({
-        top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
+        top_tracks <- names(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE))
         cat( sub(".*;", "", top_tracks[3]) )
     })
     
@@ -223,19 +209,14 @@ shinyServer(function(input, output) {
         cat("Top genres")
     })
     
-    output$text_date_range <- renderPrint({
-        req(input$file)
-        cat( paste0( "Date range: ",substr(min(d()$endTime),1,10)," to ", substr(max(d()$endTime),1,10) ) )
-    })
-    
     output$text_num_of_tracks <- renderPrint({
         req(input$file)
-        cat( paste0( length(d()$endTime), " listenings" ) )
+        cat( paste0( length(data()$endTime), " listenings" ) )
     })
     
     output$text_total_hours_played <- renderPrint({
         req(input$file)
-        cat( paste0(round((sum(d()$minPlayed)/60),1), " hours played") )
+        cat( paste0(round((sum(data()$minPlayed)/60),1), " hours played") )
     })
     
     
@@ -260,15 +241,15 @@ shinyServer(function(input, output) {
     })
     
     output$longest_track_min_played <- renderPrint({
-        cat( round(max(d()$minPlayed),0) )
+        cat( round(max(data()$minPlayed),0) )
     })
     
     output$longest_track_name <- renderPrint({
-        cat(d()[d()$minPlayed == max(d()$minPlayed),"trackName"])
+        cat(data()[data()$minPlayed == max(data()$minPlayed),"trackName"])
     })
     
     output$longest_track_artist <- renderPrint({
-        cat(d()[d()$minPlayed == max(d()$minPlayed),"artistName"])
+        cat(data()[data()$minPlayed == max(data()$minPlayed),"artistName"])
     })
     
     # average minutes played in hour
@@ -318,11 +299,11 @@ shinyServer(function(input, output) {
     }
     
     output$plot_avg_mins_played <- renderPlot({
-        draw_plot_avg_mins_played(d(), title="every weekday")
+        draw_plot_avg_mins_played(data(), title="every weekday")
     })
     
     output$plot_total_tracks_per_hour <- renderPlot({
-        dataframe <- data.frame(endTime = as.POSIXct(d()$endTime, format = "%Y-%m-%d %H:%M"), hour = as.integer(d()$hour))
+        dataframe <- data.frame(endTime = as.POSIXct(data()$endTime, format = "%Y-%m-%d %H:%M"), hour = as.integer(data()$hour))
         
         ggplot(dataframe, aes(x = hour)) + 
             ggtitle("How much you have listened at each hour") +
@@ -337,11 +318,11 @@ shinyServer(function(input, output) {
     })
     
     output$hour_max_tracks_played <- renderPrint({
-        cat( names(sort(table(d()$hour), decreasing=TRUE)[1]) )
+        cat( names(sort(table(data()$hour), decreasing=TRUE)[1]) )
     })
     
     output$plot_total_tracks_per_weekday <- renderPlot({
-        dataframe <- data.frame(endTime = d()$endTime, weekday = d()$weekday)
+        dataframe <- data.frame(endTime = data()$endTime, weekday = data()$weekday)
         dataframe$weekday <- factor(dataframe$weekday, 
                                     levels= rev(c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")))
         ggplot(dataframe, aes(x = weekday)) + 
@@ -359,32 +340,32 @@ shinyServer(function(input, output) {
     })
     
     output$weekday_max_tracks_played <- renderPrint({
-        cat( names(sort(table(d()$weekday), decreasing=TRUE)[1]) )
+        cat( names(sort(table(data()$weekday), decreasing=TRUE)[1]) )
     })
     
     output$day_max_mins_played <- renderPrint({
-        temp <- data.frame( min_played = d()$minPlayed, day = as.factor(substr(d()$endTime,1,10)) )
+        temp <- data.frame( min_played = data()$minPlayed, day = as.factor(substr(data()$endTime,1,10)) )
         temp <- aggregate(temp$min_played, list(temp$day), sum)
         cat( paste0("On ", as.character( temp[temp$x == max(temp$x),1] ),"you had been listening to music for " ) )
     })
     
     output$max_hours_played_per_day <- renderPrint({
-        temp <- data.frame( min_played = d()$minPlayed, day = as.factor(substr(d()$endTime,1,10)) )
+        temp <- data.frame( min_played = data()$minPlayed, day = as.factor(substr(data()$endTime,1,10)) )
         temp <- aggregate(temp$min_played, list(temp$day), sum)
         cat( paste0(round( (temp[temp$x == max(temp$x),2]/60),1), " hours.") )
     })
     
     output$top_artist_day_max_mins_played <- renderPrint({
-        temp <- data.frame( min_played = d()$minPlayed, day = as.factor(substr(d()$endTime,1,10)) )
+        temp <- data.frame( min_played = data()$minPlayed, day = as.factor(substr(data()$endTime,1,10)) )
         temp <- aggregate(temp$min_played, list(temp$day), sum)
-        temp1 <- d()[ which( as.POSIXct(substr(d()$endTime,1,10), format = "%Y-%m-%d") == as.character( temp[temp$x == max(temp$x),1] ) ), ]
+        temp1 <- data()[ which( as.POSIXct(substr(data()$endTime,1,10), format = "%Y-%m-%d") == as.character( temp[temp$x == max(temp$x),1] ) ), ]
         cat( names(sort(table(temp1$artistName), decreasing=TRUE)[1]) )
     })
     
     # top x % most frequently listened artists
     output$count_of_top_artists <- renderPrint({
         proportion_of_artists <- 0.87
-        temp2 <- d()
+        temp2 <- data()
         top_tracks <- names(sort(table( paste(temp2$trackName,temp2$artistName, sep=";;;") ), decreasing=TRUE))
         temp2 <- as.data.frame(head(top_tracks, (length(top_tracks) * proportion_of_artists)))
         temp2 <- temp2 %>% 
@@ -399,7 +380,7 @@ shinyServer(function(input, output) {
     })
     
     output$plot_audio_features <- renderPlot({
-        top_tracks <- names(sort(table( paste(d()$trackName,d()$artistName, sep=";") ), decreasing=TRUE))
+        top_tracks <- names(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE))
         top_artists <- sub(".*;", "", top_tracks)
         top_tracks <- sub(";.*", "", top_tracks)
         songs_and_artists <- data.frame(trackName=top_tracks, artistName=top_artists, stringsAsFactors = FALSE)
