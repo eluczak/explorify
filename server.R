@@ -50,7 +50,7 @@ shinyServer(function(input, output) {
         
         # including only tracks which were played longer than a specific time
         min_allowed_duration = 0.5; # in minutes
-        #data <- data[ which(data$msPlayed/60000>min_allowed_duration), ]
+        data <- data[ which(data$msPlayed/60000>min_allowed_duration), ]
         
         # preparing columns
         data$minPlayed <- round(data$msPlayed/60000, 2)
@@ -203,7 +203,6 @@ shinyServer(function(input, output) {
         top_tracks <- names(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE))
         cat( sub(".*;", "", top_tracks[3]) )
     })
-    
     
     output$num_of_listenings_top_track_1 <- renderPrint({
         cat(paste(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE)[1]), "listenings")
