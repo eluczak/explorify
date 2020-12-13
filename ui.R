@@ -2,23 +2,29 @@ library(shiny)
 
 shinyUI(fluidPage(
 includeCSS("styles.css"),
-    
+ 
+fluidRow(
+    column(12,
+           column(10, offset = 1,
+                  br(),
+                  p(class="title","my Spotify stats"),
+                  p(class="subtitle","A visualization of your listening history on Spotify"),
+                  br()))),
+
+
+   
 fluidRow(
 column(10, offset = 1, class = "main",
        
     fluidRow(
-        column(12, class = "",
+        column(12,
                fluidRow(
                    column(10, offset = 1,
-                          h1(tags$b("my Spotify stats")),
-                          h3("A visualization of your listening history on Spotify"),
-                          br(),
                           p(tags$b("Instructions:")),
                           tags$ol(
                               tags$li("You'll need to request your last year's listening history from Spotify website (you find this option in the privacy settings). Usually after 2 or 3 days the data is available to download and you will receive a set of files containing various information that has been collected by Spotify. The file (or files) that we need contains only listening records and is named",tags$i("StreamingHistory*.json"), ", for example StreamingHistory0.json."),
                               tags$li("Upload the file(s) below and enjoy!")
                           ),
-                          p(tags$b("Note:"),"After upload please wait a while. It may take up to one minute to generate the report."),
                           br(),
                           br())))
         ),
@@ -27,9 +33,6 @@ column(10, offset = 1, class = "main",
         column(12, class = "",
             fluidRow(
                 column(10, offset = 1, class = "dummy",
-                       h3("Upload data"),
-                       hr(),
-                       p(span(class="dummy","Currently uploading multiple files does not work!")),
                        fileInput(
                            "input_file",
                            "Upload file(s)",
