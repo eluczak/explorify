@@ -140,6 +140,14 @@ shinyServer(function(input, output) {
         cat(length(data()$endTime))
     })
     
+    output$num_of_artists <- renderPrint({
+        cat( length(table(data()$artistName)) )
+    })
+    
+    output$num_of_tracks <- renderPrint({
+        cat( length(table(data()$trackName)) )
+    })
+    
     output$start_date <- renderPrint({
         cat( substr(min(data()$endTime),1,10) )
     })
