@@ -87,21 +87,21 @@ column(10, offset = 1, class = "main",
                           p(tags$b(textOutput("top_track_title_1", inline = TRUE)),
                             br(),
                             textOutput("top_track_artist_1", inline = TRUE)),
-                          p("xx listenings")),
+                          p(textOutput("num_of_listenings_top_track_1", inline = TRUE))),
 
                    column(2, offset = 1, class = "dummy",
                           p(img(src = "images/album2.png", width = "80%")),
                           p(tags$b(textOutput("top_track_title_2", inline = TRUE)),
                             br(),
                             textOutput("top_track_artist_2", inline = TRUE)),
-                          p("xx listenings")),
+                          p(textOutput("num_of_listenings_top_track_2", inline = TRUE))),
 
                    column(2, offset = 1, class = "dummy",
                           p(img(src = "images/album3.png", width = "80%")),
                           p(tags$b(textOutput("top_track_title_3", inline = TRUE)),
                             br(),
                             textOutput("top_track_artist_3", inline = TRUE)),
-                          p("xx listenings"))
+                          p(textOutput("num_of_listenings_top_track_3", inline = TRUE)))
 
                    ))),
 

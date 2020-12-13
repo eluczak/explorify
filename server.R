@@ -166,20 +166,17 @@ shinyServer(function(input, output) {
     })
     
     output$num_of_listenings_top_artist_1 <- renderPrint({
-        cat(sort(table(data()$artistName), decreasing=TRUE)[1] )
+        cat(paste(sort(table(data()$artistName), decreasing=TRUE)[1] ), "listenings")
     })
     
     output$num_of_listenings_top_artist_2 <- renderPrint({
-        cat(sort(table(data()$artistName), decreasing=TRUE)[2] )
+        cat(paste(sort(table(data()$artistName), decreasing=TRUE)[2] ), "listenings")
     })
     
     output$num_of_listenings_top_artist_3 <- renderPrint({
-        cat(sort(table(data()$artistName), decreasing=TRUE)[3] )
+        cat(paste(sort(table(data()$artistName), decreasing=TRUE)[3] ), "listenings")
     })
     
-    
-    
-    # title of most played song
     output$top_track_title_1 <- renderPrint({
         top_tracks <- names(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE))
         cat( sub(";.*", "", top_tracks[1]) )
@@ -206,6 +203,21 @@ shinyServer(function(input, output) {
         top_tracks <- names(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE))
         cat( sub(".*;", "", top_tracks[3]) )
     })
+    
+    
+    output$num_of_listenings_top_track_1 <- renderPrint({
+        cat(paste(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE)[1]), "listenings")
+    })
+    
+    output$num_of_listenings_top_track_2 <- renderPrint({
+        cat(paste(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE)[2]), "listenings")
+    })
+    
+    output$num_of_listenings_top_track_3 <- renderPrint({
+        cat(paste(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE)[3]), "listenings")
+    })
+    
+    
     
     output$text_top_artists <- renderPrint({
         req(input$file)
