@@ -114,16 +114,9 @@ column(10, offset = 1, class = "main",
                       p(tags$span(class = "big",textOutput("num_of_artists", inline = TRUE)),"artists"),
                       p(tags$span(class = "big",textOutput("num_of_tracks", inline = TRUE)),"tracks")),
                column(7, offset = 1,
-                      br(),br(),
-                      p("Mon --------------------------------"),
-                      p("Tue ----------------------------------------"),
-                      p("Wed ----------------------------------------------------------------------------------------"),
-                      p("Thu ------------------------------------------------"),
-                      p("Fri --------------------"),
-                      p("Sat -----"),
-                      p("Sun ---------"),
-                      p("------------------10------------------20------------------30------------------40------------------50------------------>"),
-                      p("total time played")))
+                      plotOutput(
+                          "plot_total_tracks_per_weekday",
+                          width = "100%")))
     ),
 
     fluidRow(

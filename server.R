@@ -157,9 +157,8 @@ shinyServer(function(input, output) {
     })
     
     output$total_hours_played <- renderPrint({
-        cat( round((sum(data()$minPlayed)/60),1) )
-    })
-    
+        cat( round((sum(data()$minPlayed)/60),0) )
+    }) 
     
     output$top_artist_1 <- renderPrint({
         cat( names(sort(table(data()$artistName), decreasing=TRUE)[1]) )
@@ -355,21 +354,21 @@ shinyServer(function(input, output) {
     
     output$plot_total_tracks_per_weekday <- renderPlot({
         dataframe <- data.frame(endTime = data()$endTime, weekday = data()$weekday)
+        
+        max_value <- max(table(dataframe$weekday))
+        
         dataframe$weekday <- factor(dataframe$weekday, 
                                     levels= rev(c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")))
-        ggplot(dataframe, aes(x = weekday)) + 
-            ggtitle("How much you have listened on each day of the week") +
-            geom_histogram(bins = 7, colour = "darkorchid", fill="darkorchid", stat="count") + 
-            theme_minimal() + 
-            coord_flip() +
+        ggplot(dataframe, aes(y=weekday)) +
+            theme_minimal() +
+            coord_cartesian(xlim = c(0, 1.1*max_value)) +
             theme(panel.grid.major.x = element_blank()) +
-            theme(panel.grid.minor.x = element_blank()) +
             theme(panel.grid.major.y = element_blank()) +
+            theme(panel.grid.minor.x = element_blank()) +
+            geom_bar(width = 0.4, fill = "#cbd0d6") +
             theme(axis.title.y = element_blank()) +
-            theme(plot.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7")) +
-            ylab("Total number of tracks") +
-            theme(aspect.ratio = 1/4)
-    })
+            xlab("Total number of tracks")
+    })    
     
     output$weekday_max_tracks_played <- renderPrint({
         cat( names(sort(table(data()$weekday), decreasing=TRUE)[1]) )
