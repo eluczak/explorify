@@ -127,8 +127,9 @@ column(10, offset = 1, class = "main",
                column(10, offset = 1,
                       h3("How much you listened at each hour"),
                       hr(),
-                      p("y - average listening time in minutes"),
-                      p(img(src = "images/total_listening_time_by_hour.png", width = "100%")),
+                      plotOutput(
+                          "plot_total_tracks_per_hour",
+                          width = "100%"),
                       br(),
                       selectInput("hour_plot_weekday", "day of the week", c("all", "weekdays", "weekends", "---", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))))
     ),

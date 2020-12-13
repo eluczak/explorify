@@ -223,35 +223,7 @@ shinyServer(function(input, output) {
         cat(paste(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE)[3]), "listenings")
     })
     
-    
-    
-    output$text_top_artists <- renderPrint({
-        req(input$file)
-        cat("Top artists")
-    })
-    
-    output$text_top_tracks <- renderPrint({
-        req(input$file)
-        cat("Top tracks")
-    })
-    
-    output$text_top_genres <- renderPrint({
-        req(input$file)
-        cat("Top genres")
-    })
-    
-    output$text_num_of_tracks <- renderPrint({
-        req(input$file)
-        cat( paste0( length(data()$endTime), " listenings" ) )
-    })
-    
-    output$text_total_hours_played <- renderPrint({
-        req(input$file)
-        cat( paste0(round((sum(data()$minPlayed)/60),1), " hours played") )
-    })
-    
-    
-    # it should return an array instead of string
+    # it should return a list instead of string
     output$top_genre_1 <- renderPrint({
         get_top_genre(1)
     })
@@ -337,11 +309,11 @@ shinyServer(function(input, output) {
         dataframe <- data.frame(endTime = as.POSIXct(data()$endTime, format = "%Y-%m-%d %H:%M"), hour = as.integer(data()$hour))
         
         ggplot(dataframe, aes(x = hour)) + 
-            ggtitle("How much you have listened at each hour") +
-            geom_histogram(bins = 24, colour = "#f7f7f7", fill="orchid") + 
-            coord_polar(start = 0) + 
+            geom_histogram(bins = 24, colour = "#ffffff", fill = "#a7eb66") + 
+            #coord_polar(start = 0) + 
             theme_minimal() + 
             theme(panel.grid.minor.x = element_blank()) +
+            # scale_fill_continuous(low = "#ffff00", high = "#84d31c") +
             ylab("Total number of tracks") +
             #theme(plot.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7")) +
             #theme(panel.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7")) +
