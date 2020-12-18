@@ -1,14 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Balsamiq+Sans&display=swap');
 
-h1 {
-  font-family: 'Balsamiq Sans', cursive;
-  font-weight: 700;
-  line-height: 1.1;
-  color: #ffa500;
-}
-
 h3 {
   font-weight: bold;
+  font-family: sans-serif;
+
 }
 
 body {
@@ -35,6 +30,17 @@ body {
 }
 
 .big {
-	font-size: 1.5em;
+	font-size: 1.6em;
 	font-weight: bold;
+}
+
+.title {
+  font-size: 2.56em;
+  color: #000000;
+}
+
+.subtitle {
+  font-size: 2.56em;
+  color: #ff0066;
+  /*#52cc00;*/
 }
