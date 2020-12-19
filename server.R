@@ -334,6 +334,21 @@ shinyServer(function(input, output) {
             scale_x_continuous(breaks = seq(-0.5,22.5), labels = seq(0,23))
     })
     
+    output$plot_total_tracks_per_month <- renderPlot({
+        dataframe <- data.frame(endTime = as.POSIXct(data()$endTime, format = "%Y-%m-%d %H:%M"), month = as.integer(data()$month))
+
+        ggplot(dataframe, aes(x = month, fill=factor(month))) +
+            geom_bar() +
+            theme_minimal() +
+            theme(panel.grid.minor.x = element_blank()) +
+            theme(panel.grid.major.x = element_blank()) +
+            ylab("Total number of tracks") +
+            xlab("Month") +
+            scale_x_continuous(breaks = seq(1,12), labels = seq(1,12)) +
+            theme(legend.position='none')
+    })
+
+
     output$hour_max_tracks_played <- renderPrint({
         cat( names(sort(table(data()$hour), decreasing=TRUE)[1]) )
     })
@@ -363,7 +378,7 @@ shinyServer(function(input, output) {
     output$day_max_mins_played <- renderPrint({
         temp <- data.frame( min_played = data()$minPlayed, day = as.factor(substr(data()$endTime,1,10)) )
         temp <- aggregate(temp$min_played, list(temp$day), sum)
-        cat( paste0("On ", as.character( temp[temp$x == max(temp$x),1] ),"you had been listening to music for " ) )
+        cat( paste("On", as.character( temp[temp$x == max(temp$x),1] ),"you had been listening for a longest time," ) )
     })
     
     output$max_hours_played_per_day <- renderPrint({
