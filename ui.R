@@ -7,8 +7,8 @@ fluidRow(
     column(12,
            column(10, offset = 1,
                   br(),
-                  p(class="title","my Spotify stats"),
-                  p(class="subtitle","A visualization of your listening history on Spotify"),
+                  p(class="title","musiclife"),
+                  p(class="subtitle","A visualization of your listening history in Spotify",br(),"without the need to log in."),
                   br()))),
 
 
@@ -19,12 +19,10 @@ column(10, offset = 1, class = "main",
     fluidRow(
         column(12,
                fluidRow(
-                   column(10, offset = 1,
-                          p(tags$b("Instructions:")),
-                          tags$ol(
-                              tags$li("You'll need to request your last year's listening history from Spotify website (you find this option in the privacy settings). Usually after 2 or 3 days the data is available to download and you will receive a set of files containing various information that has been collected by Spotify. The file (or files) that we need contains only listening records and is named",tags$i("StreamingHistory*.json"), ", for example StreamingHistory0.json."),
-                              tags$li("Upload the file(s) below and enjoy!")
-                          ),
+                   column(10, offset = 0,
+                          h3("Instructions:"),
+                          p("1. You'll need to request your last year's listening history from",tags$a(href="https://www.spotify.com/us/account/privacy/","Spotify website."),"Usually after 2 or 3 days the data is available to download and you will receive a set of files containing various information that has been collected by Spotify. The file (or files) that we need contains only listening records and is named",tags$i("StreamingHistory*.json"), ", for example StreamingHistory0.json."),
+                          p("2. Upload the file(s) below and enjoy!"),
                           br(),
                           br())))
         ),
@@ -32,16 +30,16 @@ column(10, offset = 1, class = "main",
     fluidRow(
         column(12, class = "",
             fluidRow(
-                column(10, offset = 1, class = "dummy",
+                column(8, offset = 4, class = "dummy",
                        fileInput(
                            "input_file",
-                           "Upload file(s) called 'StreamingHistory*.json'",
+                           "",
                            multiple = TRUE,
                            accept = ".json",
                            buttonLabel = "Browse or drag file(s) here",
                            placeholder = "No file selected",
                            width = "50%"),
-                       p("File(s) can be obtained",tags$a(href="https://www.spotify.com/us/account/privacy/","here")))))),
+                       br(),br(),br(),br(),br(),br(),br(),br(),br(),br(),br(),br())))),
 
     fluidRow(
         column(12, class = "",
@@ -180,15 +178,15 @@ column(10, offset = 1, class = "main",
     fluidRow(
         column(12, class = "dashboard_item dummy",
         column(8, offset = 2, class = "dummy",
-               h3("Trivia"),
+               h3("Quick facts"),
                hr(),
-               p("On 27 Feb 2020 you had been listening for a longest time,",
-                 tags$b("8.7"),"hours.",
-                 "Mostly of", tags$b("Arcade Fire"), "songs."),
+               p(textOutput("day_max_mins_played", inline=TRUE),
+                 tags$b(textOutput("max_hours_played_per_day", inline=TRUE)),
+                 "Mostly of", tags$b(textOutput("top_artist_day_max_mins_played", inline=TRUE)),"songs."),
                br(),
                p("The longest track you listened to, was about",
-                 tags$b("15 minutes"),"long.",
-                 "It was", tags$b("Lucid Dreams"), "by Franz Ferdinand.")))
+                 tags$b(textOutput("longest_track_min_played", inline=TRUE)),"long.",
+                 "It was", tags$b(textOutput("longest_track_name", inline=TRUE)), "by",textOutput("longest_track_artist", inline=TRUE))))
     ),
 
 
