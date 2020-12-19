@@ -125,7 +125,6 @@ column(10, offset = 1, class = "main",
         column(12, class = "dashboard_item dummy",
                column(10, offset = 1,
                       h3("How much you listened at each hour"),
-                      hr(),
                       plotOutput(
                           "plot_total_tracks_per_hour",
                           width = "100%"),
@@ -137,11 +136,11 @@ column(10, offset = 1, class = "main",
         column(12, class = "dashboard_item dummy",
                column(10, offset = 1,
                       h3("How much you listened in each month"),
-                      hr(),
-                      p("y - average listening time in hours"),
-                      p(img(src = "images/total_listening_time_by_hour.png", width = "100%")),
+                      plotOutput(
+                          "plot_total_tracks_per_month",
+                          width = "100%"),
                       br(),
-                      selectInput("month_plot_year", "year", c("all", "2020", "2019", "2018"))))
+                      selectInput("month_plot_year", "Year", c("All", "This year","Last year"))))
     ),
 
     fluidRow(
