@@ -122,16 +122,30 @@ shinyServer(function(input, output) {
         # ordering values on a plot
         audio_features$features <- factor(audio_features$features, levels=audio_features$features)
         
-        audio_features_plot <- ggplot(data=audio_features, aes(x=features, y=values) ) +
-            geom_col(position="dodge", colour="plum", fill="plum") +
-            ylim(0,1) +
-            xlab("") +
-            ylab("") +
+        # audio_features_plot <- ggplot(data=audio_features, aes(x=features, y=values) ) +
+        #     geom_line() +
+        #     ylim(0,1) +
+        #     coord_polar() +
+        #     xlab("average value") +
+        #     ylab("") +
+        #     theme_minimal() +
+        #     theme(panel.grid.minor.x = element_blank()) +
+        #     theme(panel.grid.major.x = element_blank()) +
+        #     theme(plot.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7"))
+        
+        audio_features_plot <- ggplot(data=audio_features, aes(x=features, y=values)) +
+            geom_segment( aes(x=features ,xend=features, y=0, yend=values), color="grey") +
+            geom_point(size=5, color="#842bd7") +
+            coord_flip() +
             theme_minimal() +
-            ggtitle("Audio features of songs you listened most frequently") +
-            theme(panel.grid.minor.x = element_blank()) +
-            theme(panel.grid.major.x = element_blank()) +
-            theme(plot.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7"))
+            theme(
+                panel.grid.minor.y = element_blank(),
+                panel.grid.major.y = element_blank(),
+                legend.position="none"
+            ) +
+            ylab("average value") +
+            xlab("")
+        
         
         return(audio_features_plot)
     }
