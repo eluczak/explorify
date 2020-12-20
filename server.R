@@ -66,33 +66,44 @@ shinyServer(function(input, output) {
         return(data)
     })
         
-    get_top_genre <- function(place) # 'place' - which item should be returned (1st, 2nd etc.)
+    get_top_genres <- function(num_of_top_artists, num_of_genres)
     {
-        num_of_top_artists <- 20
-        top_artists_names <- names(sort(table(data()$artistName), decreasing=TRUE)[1:num_of_top_artists])
-        top_artists_ids <- character()
-        top_genres <- data.frame(genres=character())
+        # getting top artists' names
+        top_artists_names <- character()
+        for(i in 1:num_of_top_artists) {
+            top_artists_names <- c(top_artists_names, names(sort(table(data()$artistName), decreasing=TRUE)[i]))
+        }
         
+        # getting top artists' IDs
+        top_artists_ids <- character()
         for (i in 1:length(top_artists_names))
         {
             artist_name <- top_artists_names[i]
             artist_data <- search_spotify(artist_name, type="artist")
-            artist_data <- head(artist_data[artist_data$name==artist_name,], 1)
+            artist_data <- head(artist_data[artist_data["name"]==artist_name,], 1)
             top_artists_ids <- c(top_artists_ids, artist_data$id)
         }
         
+        # getting top artists' genres
+        top_genres <- character()
         for (i in 1:length(top_artists_ids))
         {
             URI <- paste0('https://api.spotify.com/v1/artists/', top_artists_ids[i])
             response2 <- GET(url=URI, add_headers(Authorization = HeaderValue))
             response2 <- content(response2)
-            top_genres <- rbind(top_genres, data.frame(genres=unlist(response2$genres)))
+            top_genres <- c(top_genres, data.frame(genres=unlist(response2["genres"])))
         }
-        
-        top_genres <- sort(table(top_genres), decreasing = TRUE)
-        top_genres <- as.data.frame(top_genres, stringsAsFactors = FALSE)
-        cat( (top_genres[place,1]) )
+        # vector with top genres sorted from most common ones
+        top_genres <- table(as.data.frame(unlist(top_genres)))
+        top_genres <- as.data.frame(top_genres)
+        top_genres <- head(top_genres[order(-top_genres$Freq),], num_of_genres)
+        return(top_genres)
     }
+    
+    output$top_genres <- renderTable({
+        print(get_top_genres(10, 6))
+    })
+    
     
     draw_plot_audio_features <- function(songs_and_artists)
     {
@@ -149,6 +160,34 @@ shinyServer(function(input, output) {
         
         return(audio_features_plot)
     }
+    
+    draw_plot_top_genres <- function(plot_data)
+    {
+        plot <- ggplot(plot_data, aes(x=Freq, y=reorder(Var1, Freq), fill=Freq, label=Freq)) +
+            geom_bar(stat="identity") +
+            theme_minimal() +
+            xlab("number of tracks labelled with a specific genre") +
+            ylab("") +
+            #geom_text(aes(x = 0), angle = 0, hjust = 2, size = 3) +
+            geom_text(
+                aes(label = Freq, x = 0.5),
+                position = position_dodge(0.9),
+                vjust = 0.3
+            ) +
+            scale_fill_gradient(low = "pink", high = "orangered")+
+            theme(axis.text.x = element_blank(), 
+                  axis.ticks.x = element_blank(),
+                  panel.grid.major.x = element_blank(),
+                  panel.grid.minor.x = element_blank(),
+                  panel.grid.major.y = element_blank(),
+                  legend.position="none")
+        
+        return(plot)
+    }
+    
+    output$plot_top_genres <- renderPlot({
+        draw_plot_top_genres(plot_data=get_top_genres(30,15))
+    })
     
     output$num_of_listenings <- renderPrint({
         cat(length(data()$endTime))
@@ -235,26 +274,6 @@ shinyServer(function(input, output) {
     
     output$num_of_listenings_top_track_3 <- renderPrint({
         cat(paste(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE)[3]), "listenings")
-    })
-    
-    # it should return a list instead of string
-    output$top_genre_1 <- renderPrint({
-        get_top_genre(1)
-    })
-    output$top_genre_2 <- renderPrint({
-        get_top_genre(2)
-    })
-    output$top_genre_3 <- renderPrint({
-        get_top_genre(3)
-    })
-    output$top_genre_4 <- renderPrint({
-        get_top_genre(4)
-    })
-    output$top_genre_5 <- renderPrint({
-        get_top_genre(5)
-    })
-    output$top_genre_6 <- renderPrint({
-        get_top_genre(6)
     })
     
     output$longest_track_min_played <- renderPrint({
