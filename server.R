@@ -105,6 +105,14 @@ shinyServer(function(input, output) {
     })
     
     
+    get_artist_image <- function(artist_id) 
+    {
+        response <- GET(url=paste0("https://api.spotify.com/v1/artists/","12Chz98pHFMPJEknJQMWvI"), add_headers(Authorization = HeaderValue))
+        response <- content(response)
+        image_url <- data.frame(response["images"])[1,2]
+        return(image_url)
+    }
+
     draw_plot_audio_features <- function(songs_and_artists)
     {
         audio_features <- data.frame("danceability"=double(), "energy"=double(),"loudness"=double(),
@@ -224,6 +232,37 @@ shinyServer(function(input, output) {
     output$top_artist_3 <- renderPrint({
         cat( names(sort(table(data()$artistName), decreasing=TRUE)[3]) )
     })
+    
+    top_artist_image_url <- function(place)
+        # argument place means the place in ranking of most listened artists
+        # 1 is the most listened, 2 is the second etc.
+    {
+        # getting artist name
+        artist_name <- names(sort(table(data()$artistName), decreasing=TRUE)[place])
+        
+        # getting artist_id
+        artist_id <- search_spotify(artist_name, type="artist")
+        artist_id <- head(artist_id[artist_id["name"]==artist_name,], 1)
+        
+        # getting an image
+        image_url <- artist_id$images[1]
+        image_url <- as.data.frame(image_url)
+        return(image_url$url[1])
+    }
+        
+    
+    output$top_artist_1_image <- renderUI({
+        tags$img(src = top_artist_image_url(place = 1), width = "80%", height = "80%")
+    })
+    
+    output$top_artist_2_image <- renderUI({
+        tags$img(src = top_artist_image_url(place = 2), width = "80%", height = "80%")
+    })
+    
+    output$top_artist_3_image <- renderUI({
+        tags$img(src = top_artist_image_url(place = 3), width = "80%", height = "80%")
+    })
+    
     
     output$num_of_listenings_top_artist_1 <- renderPrint({
         cat(paste(sort(table(data()$artistName), decreasing=TRUE)[1] ), "listenings")

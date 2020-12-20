@@ -60,17 +60,17 @@ column(10, offset = 1, class = "main",
                           hr()),
 
                    column(2, offset = 2, class = "dummy",
-                          p(img(src = "images/artist1.png", width = "80%")),
+                          uiOutput("top_artist_1_image"),
                           p(tags$b(textOutput("top_artist_1", inline = TRUE))),
                           p(textOutput("num_of_listenings_top_artist_1", inline = TRUE))),
 
                    column(2, offset = 1, class = "dummy",
-                          p(img(src = "images/artist2.png", width = "80%")),
+                          uiOutput("top_artist_2_image"),
                           p(tags$b(textOutput("top_artist_2", inline = TRUE))),
                           p(textOutput("num_of_listenings_top_artist_2", inline = TRUE))),
 
                    column(2, offset = 1, class = "dummy",
-                          p(img(src = "images/artist3.png", width = "80%")),
+                          uiOutput("top_artist_3_image"),
                           p(tags$b(textOutput("top_artist_3", inline = TRUE))),
                           p(textOutput("num_of_listenings_top_artist_3", inline = TRUE)))
 
