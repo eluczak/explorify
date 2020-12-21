@@ -154,7 +154,7 @@ shinyServer(function(input, output) {
         
         audio_features_plot <- ggplot(data=audio_features, aes(x=features, y=values)) +
             geom_segment( aes(x=features ,xend=features, y=0, yend=values), color="grey") +
-            geom_point(size=5, color="#842bd7") +
+            geom_point(size=5, color="#7add00") +
             coord_flip() +
             theme_minimal() +
             theme(
@@ -176,19 +176,18 @@ shinyServer(function(input, output) {
             theme_minimal() +
             xlab("number of tracks labelled with a specific genre") +
             ylab("") +
-            #geom_text(aes(x = 0), angle = 0, hjust = 2, size = 3) +
             geom_text(
                 aes(label = Freq, x = 0.5),
                 position = position_dodge(0.9),
                 vjust = 0.3
             ) +
-            scale_fill_gradient(low = "pink", high = "orangered")+
+            scale_fill_gradient(low = "#00baff", high = "orangered") +
             theme(axis.text.x = element_blank(), 
                   axis.ticks.x = element_blank(),
                   panel.grid.major.x = element_blank(),
                   panel.grid.minor.x = element_blank(),
                   panel.grid.major.y = element_blank(),
-                  legend.position="none")
+                  legend.position="none") 
         
         return(plot)
     }
@@ -316,7 +315,7 @@ shinyServer(function(input, output) {
     })
     
     output$longest_track_min_played <- renderPrint({
-        cat( round(max(data()$minPlayed),0) )
+        cat( paste(round(max(data()$minPlayed),0), "minutes") )
     })
     
     output$longest_track_name <- renderPrint({
@@ -378,31 +377,62 @@ shinyServer(function(input, output) {
     })
     
     output$plot_total_tracks_per_hour <- renderPlot({
-        dataframe <- data.frame(endTime = as.POSIXct(data()$endTime, format = "%Y-%m-%d %H:%M"), hour = as.integer(data()$hour))
+        # dataframe <- data.frame(endTime = as.POSIXct(data()$endTime, format = "%Y-%m-%d %H:%M"), hour = as.integer(data()$hour))
+        # 
+        # ggplot(dataframe, aes(x = hour)) + 
+        #     geom_histogram(bins = 24, colour="#ffffff", fill="#ff160f83") + 
+        #     #coord_polar(start = 0) + 
+        #     theme_minimal() + 
+        #     theme(panel.grid.minor.x = element_blank(),
+        #           panel.grid.major.x = element_blank()) +
+        #     # scale_fill_continuous(low = "#ffff00", high = "#84d31c") +
+        #     ylab("Total number of tracks") +
+        #     #theme(plot.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7")) +
+        #     #theme(panel.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7")) +
+        #     scale_x_continuous(breaks = seq(0,23), labels = seq(0,23))
+        dataframe <- data.frame(endTime = as.POSIXct(data()$endTime, format = "%Y-%m-%d %H:%M"),
+                                hour = substr(data()$endTime, 12,13))
         
-        ggplot(dataframe, aes(x = hour)) + 
-            geom_histogram(bins = 24, colour = "#ffffff", fill = "#a7eb66") + 
-            #coord_polar(start = 0) + 
-            theme_minimal() + 
-            theme(panel.grid.minor.x = element_blank()) +
-            # scale_fill_continuous(low = "#ffff00", high = "#84d31c") +
+        
+        dataframe<- as.data.frame(table(dataframe$hour))
+        dataframe$Var1 <- as.POSIXct(dataframe$Var1, format = "%H")
+        
+        smooth_line <- as.data.frame(spline(dataframe$Var1, dataframe$Freq))
+        
+        smooth_line$x <- as.POSIXct(smooth_line$x, origin = "1970-01-01 00:00:00")
+        smooth_line <- as.data.frame(spline(smooth_line$x, smooth_line$y))
+        smooth_line$x <- as.POSIXct(smooth_line$x, origin = "1970-01-01 00:00:00")
+        head(smooth_line)
+        
+        
+        hours <- as.POSIXct(paste0(c(0:23),":00:00"), format = "%H:%M")
+        
+        label_hours <- c(as.character(paste0(seq(0:22),":00")),"00:00")
+        
+        smooth_line$x <- as.integer(smooth_line$x)
+        ggplot(smooth_line, aes(x = x, y = y)) +
+            geom_line(colour="#ffaa55", size = 2) +
+            theme_minimal() +
             ylab("Total number of tracks") +
-            #theme(plot.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7")) +
-            #theme(panel.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7")) +
-            scale_x_continuous(breaks = seq(-0.5,22.5), labels = seq(0,23))
+            xlab("") +
+            theme(panel.grid.minor.x = element_blank(),
+                  panel.grid.major.x = element_blank()) + 
+            scale_x_continuous(breaks = hours,labels =label_hours) +
+            theme(axis.text.x = element_text(angle = -90, vjust = 0.5, hjust=1))
+        
     })
     
     output$plot_total_tracks_per_month <- renderPlot({
         dataframe <- data.frame(endTime = as.POSIXct(data()$endTime, format = "%Y-%m-%d %H:%M"), month = as.integer(data()$month))
 
-        ggplot(dataframe, aes(x = month, fill=factor(month))) +
-            geom_bar() +
+        ggplot(dataframe, aes(x = month)) +
+            geom_bar(fill="#7a7f8084") +
             theme_minimal() +
             theme(panel.grid.minor.x = element_blank()) +
             theme(panel.grid.major.x = element_blank()) +
             ylab("Total number of tracks") +
-            xlab("Month") +
-            scale_x_continuous(breaks = seq(1,12), labels = seq(1,12)) +
+            xlab("") +
+            scale_x_continuous(breaks = seq(1,12), labels = month.name) +
             theme(legend.position='none')
     })
 
@@ -424,7 +454,7 @@ shinyServer(function(input, output) {
             theme(panel.grid.major.x = element_blank()) +
             theme(panel.grid.major.y = element_blank()) +
             theme(panel.grid.minor.x = element_blank()) +
-            geom_bar(width = 0.4, fill = "#cbd0d6") +
+            geom_bar(width = 0.4, fill="#6a6c6e") +
             theme(axis.title.y = element_blank()) +
             xlab("Total number of tracks")
     })    
