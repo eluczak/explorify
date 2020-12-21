@@ -151,11 +151,7 @@ column(10, offset = 1, class = "main",
                       plotOutput(
                           "plot_top_genres",
                           width = "90%"),
-                      sliderInput("genres_plot_num_of_songs",
-                                  "Number of most played songs:",
-                                  value = 5,
-                                  min = 1,
-                                  max = 10)))
+                      br()))
     ),
 
 
@@ -169,11 +165,9 @@ column(10, offset = 1, class = "main",
                       plotOutput(
                           "plot_audio_features",
                           width = "100%"),
-                      sliderInput("audio_features_plot_num_of_songs",
-                                  "Number of most played songs:",
-                                  value = 5,
-                                  min = 1,
-                                  max = 10)))
+                      br(),
+                      p("A description of each feature you can find",
+                        tags$a(href="https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/","here") )))
     ),
 
     fluidRow(
