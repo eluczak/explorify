@@ -100,11 +100,6 @@ shinyServer(function(input, output) {
         return(top_genres)
     }
     
-    output$top_genres <- renderTable({
-        print(get_top_genres(10, 6))
-    })
-    
-    
     get_artist_image <- function(artist_id) 
     {
         response <- GET(url=paste0("https://api.spotify.com/v1/artists/","12Chz98pHFMPJEknJQMWvI"), add_headers(Authorization = HeaderValue))
@@ -141,17 +136,6 @@ shinyServer(function(input, output) {
         # ordering values on a plot
         audio_features$features <- factor(audio_features$features, levels=audio_features$features)
         
-        # audio_features_plot <- ggplot(data=audio_features, aes(x=features, y=values) ) +
-        #     geom_line() +
-        #     ylim(0,1) +
-        #     coord_polar() +
-        #     xlab("average value") +
-        #     ylab("") +
-        #     theme_minimal() +
-        #     theme(panel.grid.minor.x = element_blank()) +
-        #     theme(panel.grid.major.x = element_blank()) +
-        #     theme(plot.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7"))
-        
         audio_features_plot <- ggplot(data=audio_features, aes(x=features, y=values)) +
             geom_segment( aes(x=features ,xend=features, y=0, yend=values), color="grey") +
             geom_point(size=5, color="#7add00") +
@@ -164,7 +148,6 @@ shinyServer(function(input, output) {
             ) +
             ylab("average value") +
             xlab("")
-        
         
         return(audio_features_plot)
     }
@@ -206,14 +189,6 @@ shinyServer(function(input, output) {
     
     output$num_of_tracks <- renderPrint({
         cat( length(table(data()$trackName)) )
-    })
-    
-    output$start_date <- renderPrint({
-        cat( substr(min(data()$endTime),1,10) )
-    })
-    
-    output$end_date <- renderPrint({
-        cat( substr(max(data()$endTime),1,10) )
     })
     
     output$total_hours_played <- renderPrint({
@@ -261,7 +236,6 @@ shinyServer(function(input, output) {
     output$top_artist_3_image <- renderUI({
         tags$img(src = top_artist_image_url(place = 3), width = "80%", height = "80%")
     })
-    
     
     output$num_of_listenings_top_artist_1 <- renderPrint({
         cat(paste(sort(table(data()$artistName), decreasing=TRUE)[1] ), "listenings")
@@ -326,73 +300,10 @@ shinyServer(function(input, output) {
         cat(data()[data()$minPlayed == max(data()$minPlayed),"artistName"])
     })
     
-    # average minutes played in hour
-    draw_plot_avg_mins_played <- function(data, title) {
-        
-        temp <- data
-        
-        temp$day_hour = substr(temp$endTime, 1, 13)
-        temp$day_hour
-        total_mins_per_hour_by_day = aggregate(temp$minPlayed, by=temp["day_hour"], FUN=sum)
-        total_mins_per_hour_by_day$hour = substr(total_mins_per_hour_by_day$day_hour, 11, 13)
-        total_mins_per_hour_by_day
-        
-        total_mins_per_hour = aggregate(total_mins_per_hour_by_day$x, by=total_mins_per_hour_by_day["hour"], FUN=sum)
-        total_mins_per_hour
-        summary(total_mins_per_hour)
-        
-        # number of how many times I have listened music at a specific hour 
-        # (when I have listened a couple of tracks in one hour but one day, it still counts as one.
-        # it counts just how many times i played at a specific hour  but on separate days)
-        temp <- as.data.frame(table(total_mins_per_hour_by_day$hour))
-        
-        # total number of minutes played during a specific hour
-        temp$total_mins <- total_mins_per_hour$x
-        
-        # mean number of minutes of music played at a specific hour
-        temp$mean = temp$total_mins / temp$Freq
-        
-        temp$Var1 <- as.character(temp$Var1)
-        
-        #plot(temp$Var1, temp$mean, type="o", xlab="hour", ylab="mean minutes played", main=title, ylim=c(1,60))
-        
-        dataframe <- data.frame(avg_mins_played = temp$mean, hour = as.integer(temp$Var1))
-        ggplot(dataframe, aes(x = hour, y = avg_mins_played)) +
-            geom_point(colour="navy") +
-            ggtitle("Your average listening time per hour") +
-            geom_line(colour="steelblue") +
-            theme_minimal() +
-            ylim(c(0,60))+
-            theme(panel.grid.minor.x = element_blank()) +
-            ylab("average minutes played") +
-            xlab("hour") +
-            theme(plot.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7")) +
-            theme(panel.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7")) +
-            scale_x_continuous(breaks = seq(0,23), labels = seq(0,23)) +
-            theme(aspect.ratio = 2/5)
-    }
-    
-    output$plot_avg_mins_played <- renderPlot({
-        draw_plot_avg_mins_played(data(), title="every weekday")
-    })
     
     output$plot_total_tracks_per_hour <- renderPlot({
-        # dataframe <- data.frame(endTime = as.POSIXct(data()$endTime, format = "%Y-%m-%d %H:%M"), hour = as.integer(data()$hour))
-        # 
-        # ggplot(dataframe, aes(x = hour)) + 
-        #     geom_histogram(bins = 24, colour="#ffffff", fill="#ff160f83") + 
-        #     #coord_polar(start = 0) + 
-        #     theme_minimal() + 
-        #     theme(panel.grid.minor.x = element_blank(),
-        #           panel.grid.major.x = element_blank()) +
-        #     # scale_fill_continuous(low = "#ffff00", high = "#84d31c") +
-        #     ylab("Total number of tracks") +
-        #     #theme(plot.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7")) +
-        #     #theme(panel.background = element_rect(fill = "#f7f7f7", colour = "#f7f7f7")) +
-        #     scale_x_continuous(breaks = seq(0,23), labels = seq(0,23))
         dataframe <- data.frame(endTime = as.POSIXct(data()$endTime, format = "%Y-%m-%d %H:%M"),
                                 hour = substr(data()$endTime, 12,13))
-        
         
         dataframe<- as.data.frame(table(dataframe$hour))
         dataframe$Var1 <- as.POSIXct(dataframe$Var1, format = "%H")
@@ -403,7 +314,6 @@ shinyServer(function(input, output) {
         smooth_line <- as.data.frame(spline(smooth_line$x, smooth_line$y))
         smooth_line$x <- as.POSIXct(smooth_line$x, origin = "1970-01-01 00:00:00")
         head(smooth_line)
-        
         
         hours <- as.POSIXct(paste0(c(0:23),":00:00"), format = "%H:%M")
         
@@ -480,23 +390,6 @@ shinyServer(function(input, output) {
         temp <- aggregate(temp$min_played, list(temp$day), sum)
         temp1 <- data()[ which( as.POSIXct(substr(data()$endTime,1,10), format = "%Y-%m-%d") == as.character( temp[temp$x == max(temp$x),1] ) ), ]
         cat( names(sort(table(temp1$artistName), decreasing=TRUE)[1]) )
-    })
-    
-    # top x % most frequently listened artists
-    output$count_of_top_artists <- renderPrint({
-        proportion_of_artists <- 0.87
-        temp2 <- data()
-        top_tracks <- names(sort(table( paste(temp2$trackName,temp2$artistName, sep=";;;") ), decreasing=TRUE))
-        temp2 <- as.data.frame(head(top_tracks, (length(top_tracks) * proportion_of_artists)))
-        temp2 <- temp2 %>% 
-            separate('head(top_tracks, (length(top_tracks) * proportion_of_artists))', into = c("track", "artist"), sep = ";;;")
-        
-        cat(length(table(temp2$artist )))
-    })
-    
-    output$percent_of_top_artists <- renderPrint({
-        proportion_of_artists <- 0.87
-        cat(proportion_of_artists*100)
     })
     
     output$plot_audio_features <- renderPlot({
