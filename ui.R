@@ -177,9 +177,7 @@ column(10, offset = 1, class = "main",
                hr(),
                p(textOutput("quick_fact_1", inline=TRUE)),
                br(),
-               p("The longest track you listened to, was about",
-                 tags$b(textOutput("longest_track_min_played", inline=TRUE)),"long.",
-                 "It was", tags$b(textOutput("longest_track_name", inline=TRUE)), "by",textOutput("longest_track_artist", inline=TRUE))))
+               p(textOutput("quick_fact_2", inline=TRUE))))
     ),
 
 

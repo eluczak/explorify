@@ -288,17 +288,24 @@ shinyServer(function(input, output) {
         cat(paste(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE)[3]), "listenings")
     })
     
-    output$longest_track_min_played <- renderPrint({
-        cat( paste(round(max(data()$minPlayed),0), "minutes") )
+    longest_track_min_played <- function()
+    {
+        return( round(max(data()$minPlayed),0) )
+    }
+    
+    longest_track_name <- function(){
+        return(data()[data()$minPlayed == max(data()$minPlayed),"trackName"])
+    }
+    
+    longest_track_artist <- function(){
+        return(data()[data()$minPlayed == max(data()$minPlayed),"artistName"])
+    }
+    
+    output$quick_fact_2 <- renderPrint({
+        cat( paste0("The longest track you listened to, was about ", longest_track_min_played()," minutes long. ",
+                    "It was ",longest_track_name()," by ",longest_track_artist(),".") )
     })
     
-    output$longest_track_name <- renderPrint({
-        cat(data()[data()$minPlayed == max(data()$minPlayed),"trackName"])
-    })
-    
-    output$longest_track_artist <- renderPrint({
-        cat(data()[data()$minPlayed == max(data()$minPlayed),"artistName"])
-    })
     
     
     output$plot_total_tracks_per_hour <- renderPlot({
@@ -377,7 +384,9 @@ shinyServer(function(input, output) {
     {
         temp <- data.frame( min_played = data()$minPlayed, day = as.factor(substr(data()$endTime,1,10)) )
         temp <- aggregate(temp$min_played, list(temp$day), sum)
-        return( as.character( temp[temp$x == max(temp$x),1] ) )
+        date <- as.Date(temp[temp$x == max(temp$x),1])
+        date <- format(date,"%d %b %Y")
+        return(date)
     }
     
     max_hours_played_per_day <- function()
@@ -395,7 +404,7 @@ shinyServer(function(input, output) {
     }
     
     output$quick_fact_1 <- renderPrint({
-        cat( paste0("On ", day_max_mins_played()," you had been listening for a longest time, that is ",max_hours_played_per_day()," hours.",
+        cat( paste0("On ", day_max_mins_played()," you had been listening for a longest time, that is ",max_hours_played_per_day()," hours. ",
                     "They were mostly of ",top_artist_day_max_mins_played()," songs.") )
     })
     
