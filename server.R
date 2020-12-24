@@ -373,23 +373,30 @@ shinyServer(function(input, output) {
         cat( names(sort(table(data()$weekday), decreasing=TRUE)[1]) )
     })
     
-    output$day_max_mins_played <- renderPrint({
+    day_max_mins_played <- function()
+    {
         temp <- data.frame( min_played = data()$minPlayed, day = as.factor(substr(data()$endTime,1,10)) )
         temp <- aggregate(temp$min_played, list(temp$day), sum)
-        cat( paste("On", as.character( temp[temp$x == max(temp$x),1] ),"you had been listening for a longest time," ) )
-    })
+        return( as.character( temp[temp$x == max(temp$x),1] ) )
+    }
     
-    output$max_hours_played_per_day <- renderPrint({
+    max_hours_played_per_day <- function()
+    {
         temp <- data.frame( min_played = data()$minPlayed, day = as.factor(substr(data()$endTime,1,10)) )
         temp <- aggregate(temp$min_played, list(temp$day), sum)
-        cat( paste0(round( (temp[temp$x == max(temp$x),2]/60),1), " hours.") )
-    })
+        return( round( (temp[temp$x == max(temp$x),2]/60),1) )
+    }
     
-    output$top_artist_day_max_mins_played <- renderPrint({
+    top_artist_day_max_mins_played <- function(){
         temp <- data.frame( min_played = data()$minPlayed, day = as.factor(substr(data()$endTime,1,10)) )
         temp <- aggregate(temp$min_played, list(temp$day), sum)
         temp1 <- data()[ which( as.POSIXct(substr(data()$endTime,1,10), format = "%Y-%m-%d") == as.character( temp[temp$x == max(temp$x),1] ) ), ]
-        cat( names(sort(table(temp1$artistName), decreasing=TRUE)[1]) )
+        return( names(sort(table(temp1$artistName), decreasing=TRUE)[1]) )
+    }
+    
+    output$quick_fact_1 <- renderPrint({
+        cat( paste0("On ", day_max_mins_played()," you had been listening for a longest time, that is ",max_hours_played_per_day()," hours.",
+                    "They were mostly of ",top_artist_day_max_mins_played()," songs.") )
     })
     
     output$plot_audio_features <- renderPlot({
