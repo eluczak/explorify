@@ -27,14 +27,15 @@ shinyServer(function(input, output) {
     mytoken = content(response)$access_token
     HeaderValue = paste0('Bearer ', mytoken)
     
-    
     useShinyjs(html = TRUE)
     
-    # line below is used for getting English weekdays' names
+    # getting English weekdays' names
     Sys.setlocale("LC_TIME", "C")
-
     
-    # reading the data
+    #---------------------------------------------------------------------------
+    # Data loading and transformation
+    #---------------------------------------------------------------------------
+    
     original_data <- reactive({
         req(input$input_file)
         path <- input$input_file
@@ -43,7 +44,6 @@ shinyServer(function(input, output) {
         return(original_data)
     })
     
-    # data transformation
     data <- reactive({
         
         data <- original_data()
@@ -65,13 +65,18 @@ shinyServer(function(input, output) {
         
         return(data)
     })
-        
+    
+    #---------------------------------------------------------------------------
+    # Functions
+    #---------------------------------------------------------------------------
+    
     get_top_genres <- function(num_of_top_artists, num_of_genres)
     {
         # getting top artists' names
         top_artists_names <- character()
         for(i in 1:num_of_top_artists) {
-            top_artists_names <- c(top_artists_names, names(sort(table(data()$artistName), decreasing=TRUE)[i]))
+            top_artists_names <- c(top_artists_names, 
+                                   names(sort(table(data()$artistName), decreasing=TRUE)[i]))
         }
         
         # getting top artists' IDs
@@ -93,26 +98,126 @@ shinyServer(function(input, output) {
             response2 <- content(response2)
             top_genres <- c(top_genres, data.frame(genres=unlist(response2["genres"])))
         }
-        # vector with top genres sorted from most common ones
+        
+        # vector with top genres (sorted most common first)
         top_genres <- table(as.data.frame(unlist(top_genres)))
         top_genres <- as.data.frame(top_genres)
         top_genres <- head(top_genres[order(-top_genres$Freq),], num_of_genres)
         return(top_genres)
     }
     
-    get_artist_image <- function(artist_id) 
+    total_listenings <- function()
     {
-        response <- GET(url=paste0("https://api.spotify.com/v1/artists/","12Chz98pHFMPJEknJQMWvI"), add_headers(Authorization = HeaderValue))
-        response <- content(response)
-        image_url <- data.frame(response["images"])[1,2]
-        return(image_url)
+        return(length(data()$endTime))
     }
-
+    
+    total_artists <- function()
+    {
+        return( length(table(data()$artistName)) )
+    }
+    
+    total_tracks <- function()
+    {
+        return( length(table(data()$trackName)) )
+    }
+    
+    total_hours <- function()
+    {
+        return( round((sum(data()$minPlayed)/60),0) )
+    } 
+    
+    get_top_artist_name <- function(place)
+    {
+        return( names(sort(table(data()$artistName), decreasing=TRUE)[place]) )
+    }
+    
+    get_top_artist_image_url <- function(place)
+    {
+        # getting artist name
+        artist_name <- names(sort(table(data()$artistName), decreasing=TRUE)[place])
+        
+        # getting artist_id
+        artist_id <- search_spotify(artist_name, type="artist")
+        artist_id <- head(artist_id[artist_id["name"]==artist_name,], 1)
+        
+        # getting an image url
+        image_url <- artist_id$images[1]
+        image_url <- as.data.frame(image_url)
+        return(image_url$url[1])
+    }
+    
+    get_top_artist_num_of_listenings <- function(place)
+    {
+        return(paste(sort(table(data()$artistName), decreasing=TRUE)[place], "listenings"))
+    }
+    
+    get_top_track_num_of_listenings <- function(place)
+    {
+        return(paste(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE)[place],
+                     "listenings"))
+    }
+    
+    get_top_track_name <- function(place)
+    {
+        top_tracks <- names(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE))
+        return( sub(";.*", "", top_tracks[place]) )
+    }
+    
+    get_top_track_artist_name <- function(place)
+    {
+        top_tracks <- names(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE))
+        return( sub(".*;", "", top_tracks[place]) )
+    }
+    
+    longest_track_min_played <- function()
+    {
+        return( round(max(data()$minPlayed),0) )
+    }
+    
+    longest_track_name <- function()
+    {
+        return(data()[data()$minPlayed == max(data()$minPlayed),"trackName"])
+    }
+    
+    longest_track_artist <- function()
+    {
+        return(data()[data()$minPlayed == max(data()$minPlayed),"artistName"])
+    }
+    
+    day_max_mins_played <- function()
+    {
+        temp <- data.frame( min_played = data()$minPlayed, day = as.factor(substr(data()$endTime,1,10)) )
+        temp <- aggregate(temp$min_played, list(temp$day), sum)
+        date <- as.Date(temp[temp$x == max(temp$x),1])
+        date <- format(date,"%d %b %Y")
+        return(date)
+    }
+    
+    max_hours_played_per_day <- function()
+    {
+        temp <- data.frame( min_played = data()$minPlayed, day = as.factor(substr(data()$endTime,1,10)) )
+        temp <- aggregate(temp$min_played, list(temp$day), sum)
+        return( round( (temp[temp$x == max(temp$x),2]/60),1) )
+    }
+    
+    top_artist_day_max_mins_played <- function()
+    {
+        temp <- data.frame( min_played = data()$minPlayed, day = as.factor(substr(data()$endTime,1,10)) )
+        temp <- aggregate(temp$min_played, list(temp$day), sum)
+        temp1 <- data()[ which( as.POSIXct(substr(data()$endTime,1,10), format = "%Y-%m-%d") == as.character( temp[temp$x == max(temp$x),1] ) ), ]
+        return( names(sort(table(temp1$artistName), decreasing=TRUE)[1]) )
+    }
+    
+    #---------------------------------------------------------------------------
+    # Plots
+    #---------------------------------------------------------------------------
+    
     draw_plot_audio_features <- function(songs_and_artists)
     {
-        audio_features <- data.frame("danceability"=double(), "energy"=double(),"loudness"=double(),
-                                     "speechiness"=double(), "acousticness"=double(),
-                                     "instrumentalness"=double(), "valence"=double(), "tempo"=double())
+        audio_features <- data.frame("danceability"=double(), "energy"=double(),
+                                     "loudness"=double(), "speechiness"=double(),
+                                     "acousticness"=double(), "instrumentalness"=double(),
+                                     "valence"=double(), "tempo"=double())
         for (i in 1:6)
         {
             artist_name <- songs_and_artists$artistName[i]
@@ -130,7 +235,8 @@ shinyServer(function(input, output) {
         
         audio_features <- as.data.frame(as.list(apply(audio_features, 2, mean)))
         audio_features <- audio_features[,c(1:5)]
-        audio_features <- data.frame(features=colnames(audio_features), values=unlist(audio_features[1,], use.names=FALSE))
+        audio_features <- data.frame(features=colnames(audio_features), 
+                                     values=unlist(audio_features[1,], use.names=FALSE))
         audio_features <- audio_features[order(-audio_features$values),]
         
         # ordering values on a plot
@@ -175,140 +281,53 @@ shinyServer(function(input, output) {
         return(plot)
     }
     
+    output$plot_total_tracks_per_month <- renderPlot({
+        dataframe <- data.frame(endTime = as.POSIXct(data()$endTime, format = "%Y-%m-%d %H:%M"), 
+                                month = as.integer(data()$month))
+        
+        ggplot(dataframe, aes(x = month)) +
+            geom_bar(fill="#6198af84") +
+            theme_minimal() +
+            theme(panel.grid.minor.x = element_blank()) +
+            theme(panel.grid.major.x = element_blank()) +
+            ylab("Total number of tracks") +
+            xlab("") +
+            scale_x_continuous(breaks = seq(1,12), labels = month.name) +
+            theme(legend.position='none')
+    })
+    
+    output$plot_total_tracks_per_weekday <- renderPlot({
+        dataframe <- data.frame(endTime = data()$endTime, weekday = data()$weekday)
+        
+        max_value <- max(table(dataframe$weekday))
+        
+        dataframe$weekday <- factor(dataframe$weekday, 
+                                    levels= rev(c("Monday", "Tuesday", "Wednesday",
+                                                  "Thursday", "Friday", "Saturday", "Sunday")))
+        ggplot(dataframe, aes(y=weekday)) +
+            theme_minimal() +
+            coord_cartesian(xlim = c(0, 1.1*max_value)) +
+            theme(panel.grid.major.x = element_blank()) +
+            theme(panel.grid.major.y = element_blank()) +
+            theme(panel.grid.minor.x = element_blank()) +
+            geom_bar(width = 0.4, fill="#CB3E85") +
+            theme(axis.title.y = element_blank()) +
+            xlab("Total number of tracks")
+    }) 
+    
+    output$plot_audio_features <- renderPlot({
+        top_tracks <- names(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE))
+        top_artists <- sub(".*;", "", top_tracks)
+        top_tracks <- sub(";.*", "", top_tracks)
+        songs_and_artists <- data.frame(trackName=top_tracks, artistName=top_artists, stringsAsFactors = FALSE)
+        draw_plot_audio_features(songs_and_artists)
+    })
+    
     output$plot_top_genres <- renderPlot({
         draw_plot_top_genres(plot_data=get_top_genres(30,15))
     })
     
-    output$num_of_listenings <- renderPrint({
-        cat(length(data()$endTime))
-    })
-    
-    output$num_of_artists <- renderPrint({
-        cat( length(table(data()$artistName)) )
-    })
-    
-    output$num_of_tracks <- renderPrint({
-        cat( length(table(data()$trackName)) )
-    })
-    
-    output$total_hours_played <- renderPrint({
-        cat( round((sum(data()$minPlayed)/60),0) )
-    }) 
-    
-    output$top_artist_1 <- renderPrint({
-        cat( names(sort(table(data()$artistName), decreasing=TRUE)[1]) )
-    })
-    
-    output$top_artist_2 <- renderPrint({
-        cat( names(sort(table(data()$artistName), decreasing=TRUE)[2]) )
-    })
-    
-    output$top_artist_3 <- renderPrint({
-        cat( names(sort(table(data()$artistName), decreasing=TRUE)[3]) )
-    })
-    
-    top_artist_image_url <- function(place)
-        # argument place means the place in ranking of most listened artists
-        # 1 is the most listened, 2 is the second etc.
-    {
-        # getting artist name
-        artist_name <- names(sort(table(data()$artistName), decreasing=TRUE)[place])
-        
-        # getting artist_id
-        artist_id <- search_spotify(artist_name, type="artist")
-        artist_id <- head(artist_id[artist_id["name"]==artist_name,], 1)
-        
-        # getting an image
-        image_url <- artist_id$images[1]
-        image_url <- as.data.frame(image_url)
-        return(image_url$url[1])
-    }
-        
-    
-    output$top_artist_1_image <- renderUI({
-        tags$img(src = top_artist_image_url(place = 1), width = "80%", height = "80%")
-    })
-    
-    output$top_artist_2_image <- renderUI({
-        tags$img(src = top_artist_image_url(place = 2), width = "80%", height = "80%")
-    })
-    
-    output$top_artist_3_image <- renderUI({
-        tags$img(src = top_artist_image_url(place = 3), width = "80%", height = "80%")
-    })
-    
-    output$num_of_listenings_top_artist_1 <- renderPrint({
-        cat(paste(sort(table(data()$artistName), decreasing=TRUE)[1] ), "listenings")
-    })
-    
-    output$num_of_listenings_top_artist_2 <- renderPrint({
-        cat(paste(sort(table(data()$artistName), decreasing=TRUE)[2] ), "listenings")
-    })
-    
-    output$num_of_listenings_top_artist_3 <- renderPrint({
-        cat(paste(sort(table(data()$artistName), decreasing=TRUE)[3] ), "listenings")
-    })
-    
-    output$top_track_title_1 <- renderPrint({
-        top_tracks <- names(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE))
-        cat( sub(";.*", "", top_tracks[1]) )
-    })
-    output$top_track_title_2 <- renderPrint({
-        top_tracks <- names(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE))
-        cat( sub(";.*", "", top_tracks[2]) )
-    })
-    output$top_track_title_3 <- renderPrint({
-        top_tracks <- names(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE))
-        cat( sub(";.*", "", top_tracks[3]) )
-    })
-
-    # artist of most played song
-    output$top_track_artist_1 <- renderPrint({
-        top_tracks <- names(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE))
-        cat( sub(".*;", "", top_tracks[1]) )
-    })
-    output$top_track_artist_2 <- renderPrint({
-        top_tracks <- names(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE))
-        cat( sub(".*;", "", top_tracks[2]) )
-    })
-    output$top_track_artist_3 <- renderPrint({
-        top_tracks <- names(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE))
-        cat( sub(".*;", "", top_tracks[3]) )
-    })
-    
-    output$num_of_listenings_top_track_1 <- renderPrint({
-        cat(paste(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE)[1]), "listenings")
-    })
-    
-    output$num_of_listenings_top_track_2 <- renderPrint({
-        cat(paste(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE)[2]), "listenings")
-    })
-    
-    output$num_of_listenings_top_track_3 <- renderPrint({
-        cat(paste(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE)[3]), "listenings")
-    })
-    
-    longest_track_min_played <- function()
-    {
-        return( round(max(data()$minPlayed),0) )
-    }
-    
-    longest_track_name <- function(){
-        return(data()[data()$minPlayed == max(data()$minPlayed),"trackName"])
-    }
-    
-    longest_track_artist <- function(){
-        return(data()[data()$minPlayed == max(data()$minPlayed),"artistName"])
-    }
-    
-    output$quick_fact_2 <- renderPrint({
-        cat( paste0("The longest track you listened to, was about ", longest_track_min_played()," minutes long. ",
-                    "It was ",longest_track_name()," by ",longest_track_artist(),".") )
-    })
-    
-    
-    
-    output$plot_total_tracks_per_hour <- renderPlot({
+    output$draw_plot_hourly <- renderPlot({
         dataframe <- data.frame(endTime = as.POSIXct(data()$endTime, format = "%Y-%m-%d %H:%M"),
                                 hour = substr(data()$endTime, 12,13))
         
@@ -327,7 +346,7 @@ shinyServer(function(input, output) {
         label_hours <- c(as.character(paste0(seq(0:22),":00")),"00:00")
         
         smooth_line$x <- as.integer(smooth_line$x)
-        ggplot(smooth_line, aes(x = x, y = y)) +
+        plot <- ggplot(smooth_line, aes(x = x, y = y)) +
             geom_line(colour="#ffaa55", size = 2) +
             theme_minimal() +
             ylab("Total number of tracks") +
@@ -336,84 +355,177 @@ shinyServer(function(input, output) {
                   panel.grid.major.x = element_blank()) + 
             scale_x_continuous(breaks = hours,labels =label_hours) +
             theme(axis.text.x = element_text(angle = -90, vjust = 0.5, hjust=1))
+        return(plot)
+    })
+    
+    #---------------------------------------------------------------------------
+    # UI elements
+    #---------------------------------------------------------------------------
+    
+    output$ui_header <- renderUI({
+        fluidRow(class = "main_area",
+            column(8, offset = 2,
+                   br(),br(),br(),br(),br(),
+                   p(class="title","explorify"),
+                   p(class="subtitle","explore your listening history in Spotify",br(),"without the need to log in."),
+                   br(),
+                   p(tags$b("Instructions: "),
+                     "Just upload a file named StreamingHistory*.json, for example \"StreamingHistory0.json\" which you can obtain from",tags$a(href="https://www.spotify.com/us/account/privacy/","Spotify website.")),
+                   #p("Note: After upload, please wait a while. It may take up to one minute to load everything.")
+                   ))
+    })
+    
+    output$ui_report_ready <- renderUI({
+        req(input$input_file)
+        fluidRow(class = "main_area",
+                 column(7, offset = 5,
+                        p(class = "ready", "report is ready, scroll down")))
+    })
+    
+    output$ui_date_range <- renderUI({
+        req(input$input_file)
+        fluidRow(class = "main_area",
+                 column(8, offset = 2,
+                        selectInput("date_range", "Date range",
+                                    c("All time" = "all_time",
+                                      "Last week" = "last_week",
+                                      "Last month" = "last_month",
+                                      "Last year" = "last_year"))))
+    })
+    
+    output$ui_top_artists <- renderUI({
+        req(input$input_file)
+        fluidRow(class = "dashboard_area",
+                 column(8, offset = 2,
+                        h3("Top artists"),
+                        hr()),
+                 column(2, offset = 2,
+                        #tags$img(src = get_top_artist_image_url(1), width = "100%", height = "100%"),
+                        p(tags$span(class = "big","1 "),tags$b(get_top_artist_name(1)),br(),
+                          get_top_artist_num_of_listenings(1))),
+                 column(2, offset = 1,
+                        #tags$img(src = get_top_artist_image_url(2), width = "100%", height = "100%"),
+                        p(tags$span(class = "big","2 "),tags$b(get_top_artist_name(2)),br(),
+                          get_top_artist_num_of_listenings(2))),
+                 column(2, offset = 1,
+                        #tags$img(src = get_top_artist_image_url(3), width = "100%", height = "100%"),
+                        p(tags$span(class = "big","3 "),tags$b(get_top_artist_name(3)),br(),
+                          get_top_artist_num_of_listenings(3),br())))
+    })
+    
+    output$ui_top_tracks <- renderUI({
+        req(input$input_file)
+        fluidRow(class = "dashboard_area",
+                 column(8, offset = 2,
+                        h3("Top tracks"),
+                        hr()),
+                 column(2, offset = 2, 
+                        p(tags$span(class = "big","1 "),tags$b(get_top_track_name(1)),br(),
+                          get_top_track_artist_name(1),br(),
+                          get_top_track_num_of_listenings(1))),
+                 column(2, offset = 1,
+                        p(tags$span(class = "big","2 "),tags$b(get_top_track_name(2)),br(),
+                          get_top_track_artist_name(2),br(),
+                          get_top_track_num_of_listenings(2))),
+                 column(2, offset = 1,
+                        p(tags$span(class = "big","3 "),tags$b(get_top_track_name(3)),br(),
+                          get_top_track_artist_name(3),br(),
+                          get_top_track_num_of_listenings(3))))
+    })
+    
+    output$ui_summary <- renderUI({
+        req(input$input_file)
+        fluidRow(class = "dashboard_area",
+                 column(2, offset = 1,
+                        br(),br(),
+                        p(tags$span(class = "big",total_hours()),br(),"hours",br()),
+                        p(tags$span(class = "big",total_listenings()),br(),"listenings",br()),
+                        p(tags$span(class = "big",total_artists()),br(),"artists",br()),
+                        p(tags$span(class = "big",total_tracks()),br(),"unique tracks")),
+                 column(7, offset = 1,
+                        plotOutput(
+                            "plot_total_tracks_per_weekday",
+                            width = "100%")))
+    })
+    
+    output$ui_hourly <- renderUI({
+        req(input$input_file)
+        fluidRow(class = "dashboard_area",
+                 column(10, offset = 1,
+                        h3("How much you listened at each hour"),
+                        plotOutput(
+                            "draw_plot_hourly",
+                            width = "100%"),
+                        br()))
+    })
+    
+    output$ui_monthly <- renderUI({
+        req(input$input_file)
+        fluidRow(class = "dashboard_area",
+                 column(10, offset = 1,
+                        h3("How much you listened in each month"),
+                        plotOutput(
+                            "plot_total_tracks_per_month",
+                            width = "100%"),
+                        br()))
         
     })
     
-    output$plot_total_tracks_per_month <- renderPlot({
-        dataframe <- data.frame(endTime = as.POSIXct(data()$endTime, format = "%Y-%m-%d %H:%M"), month = as.integer(data()$month))
-
-        ggplot(dataframe, aes(x = month)) +
-            geom_bar(fill="#7a7f8084") +
-            theme_minimal() +
-            theme(panel.grid.minor.x = element_blank()) +
-            theme(panel.grid.major.x = element_blank()) +
-            ylab("Total number of tracks") +
-            xlab("") +
-            scale_x_continuous(breaks = seq(1,12), labels = month.name) +
-            theme(legend.position='none')
-    })
-
-
-    output$hour_max_tracks_played <- renderPrint({
-        cat( names(sort(table(data()$hour), decreasing=TRUE)[1]) )
+    output$ui_genres <- renderUI({
+        req(input$input_file)
+        fluidRow(class = "dashboard_area",
+                 column(10, offset = 1,
+                        h3("Genres of your most played songs"),
+                        hr(),
+                        plotOutput(
+                            "plot_top_genres",
+                            width = "90%"),
+                        br()))
     })
     
-    output$plot_total_tracks_per_weekday <- renderPlot({
-        dataframe <- data.frame(endTime = data()$endTime, weekday = data()$weekday)
-        
-        max_value <- max(table(dataframe$weekday))
-        
-        dataframe$weekday <- factor(dataframe$weekday, 
-                                    levels= rev(c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")))
-        ggplot(dataframe, aes(y=weekday)) +
-            theme_minimal() +
-            coord_cartesian(xlim = c(0, 1.1*max_value)) +
-            theme(panel.grid.major.x = element_blank()) +
-            theme(panel.grid.major.y = element_blank()) +
-            theme(panel.grid.minor.x = element_blank()) +
-            geom_bar(width = 0.4, fill="#6a6c6e") +
-            theme(axis.title.y = element_blank()) +
-            xlab("Total number of tracks")
-    })    
-    
-    output$weekday_max_tracks_played <- renderPrint({
-        cat( names(sort(table(data()$weekday), decreasing=TRUE)[1]) )
+    output$ui_audio_features <- renderUI({
+        req(input$input_file)
+        fluidRow(class = "dashboard_area",
+                 column(10, offset = 1,
+                        br(),
+                        h3("Audio features of your most played songs"),
+                        hr(),
+                        #p(img(src = "images/audio_features_spider_plot.png", width = "100%")),
+                        plotOutput(
+                            "plot_audio_features",
+                            width = "100%"),
+                        br(),
+                        p("A description of each feature you can find",
+                          tags$a(href="https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/",
+                                 "here"))))
     })
     
-    day_max_mins_played <- function()
-    {
-        temp <- data.frame( min_played = data()$minPlayed, day = as.factor(substr(data()$endTime,1,10)) )
-        temp <- aggregate(temp$min_played, list(temp$day), sum)
-        date <- as.Date(temp[temp$x == max(temp$x),1])
-        date <- format(date,"%d %b %Y")
-        return(date)
-    }
-    
-    max_hours_played_per_day <- function()
-    {
-        temp <- data.frame( min_played = data()$minPlayed, day = as.factor(substr(data()$endTime,1,10)) )
-        temp <- aggregate(temp$min_played, list(temp$day), sum)
-        return( round( (temp[temp$x == max(temp$x),2]/60),1) )
-    }
-    
-    top_artist_day_max_mins_played <- function(){
-        temp <- data.frame( min_played = data()$minPlayed, day = as.factor(substr(data()$endTime,1,10)) )
-        temp <- aggregate(temp$min_played, list(temp$day), sum)
-        temp1 <- data()[ which( as.POSIXct(substr(data()$endTime,1,10), format = "%Y-%m-%d") == as.character( temp[temp$x == max(temp$x),1] ) ), ]
-        return( names(sort(table(temp1$artistName), decreasing=TRUE)[1]) )
-    }
-    
-    output$quick_fact_1 <- renderPrint({
-        cat( paste0("On ", day_max_mins_played()," you had been listening for a longest time, that is ",max_hours_played_per_day()," hours. ",
-                    "They were mostly of ",top_artist_day_max_mins_played()," songs.") )
+    output$ui_quick_facts <- renderUI({
+        req(input$input_file)
+        fluidRow(class = "dashboard_area",
+                 column(8, offset = 2,
+                        h3("Quick facts"),
+                        hr(),
+                        p(paste0("On ", day_max_mins_played()," you had been listening for a longest time, that is ",max_hours_played_per_day()," hours. ",
+                                 "They were mostly of ",top_artist_day_max_mins_played()," songs.")),
+                        br(),
+                        p(paste0("The longest track you listened to, was about ", longest_track_min_played()," minutes long. ",
+                                 "It was ",longest_track_name()," by ",longest_track_artist(),"."))))
     })
     
-    output$plot_audio_features <- renderPlot({
-        top_tracks <- names(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE))
-        top_artists <- sub(".*;", "", top_tracks)
-        top_tracks <- sub(";.*", "", top_tracks)
-        songs_and_artists <- data.frame(trackName=top_tracks, artistName=top_artists, stringsAsFactors = FALSE)
-        draw_plot_audio_features(songs_and_artists)
+    output$ui_info <- renderUI({
+        req(input$input_file)
+        fluidRow(class = "main_area",
+                 column(8, offset = 2,
+                        p(class = "note",
+                          "Note: Tracks that were played less than 0.5 min have been excluded from this report to avoid taking into account possibly accidentally played songs."))
+        )
     })
-
+    
+    output$ui_author <- renderUI({
+        fluidRow(class = "main_area",
+                 column(8, offset = 2,
+                        p(class = "note", "Ewelina Luczak 2020")))
+    })
+    
 })

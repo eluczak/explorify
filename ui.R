@@ -1,200 +1,33 @@
 library(shiny)
 
 shinyUI(fluidPage(
-includeCSS("styles.css"),
- 
-fluidRow(
-    column(12,
-           column(10, offset = 1,
-                  br(),
-                  p(class="title","musiclife"),
-                  p(class="subtitle","A visualization of your listening history in Spotify",br(),"without the need to log in."),
-                  br()))),
-
-
-   
-fluidRow(
-column(10, offset = 1, class = "main",
-       
-    fluidRow(
-        column(12,
-               fluidRow(
-                   column(10, offset = 0,
-                          h3("Instructions:"),
-                          p("1. You'll need to request your last year's listening history from",tags$a(href="https://www.spotify.com/us/account/privacy/","Spotify website."),"Usually after 2 or 3 days the data is available to download and you will receive a set of files containing various information that has been collected by Spotify. The file (or files) that we need contains only listening records and is named",tags$i("StreamingHistory*.json"), ", for example StreamingHistory0.json."),
-                          p("2. Upload the file(s) below and enjoy!"),
-                          br(),
-                          br())))
-        ),
-
-    fluidRow(
-        column(12, class = "",
-            fluidRow(
-                column(8, offset = 4, class = "dummy",
-                       fileInput(
-                           "input_file",
-                           "",
-                           multiple = TRUE,
-                           accept = ".json",
-                           buttonLabel = "Browse or drag file(s) here",
-                           placeholder = "No file selected",
-                           width = "50%"),
-                       br(),br(),br(),br(),br(),br(),br(),br(),br(),br(),br(),br())))),
-
-    fluidRow(
-        column(12, class = "",
-               fluidRow(
-                   column(10, offset = 1, class = "dummy",
-                          selectInput("date_range", "Date range",
-                                      c("All time" = "all_time",
-                                        "Last week" = "last_week",
-                                        "Last month" = "last_month",
-                                        "Last year" = "last_year")))))),
-
-    fluidRow(
-        column(12, class = "dashboard_item",
-               fluidRow(
-
-                   column(8, offset = 2,
-                          h3("Top artists"),
-                          hr()),
-
-                   column(2, offset = 2, class = "dummy",
-                          uiOutput("top_artist_1_image"),
-                          p(tags$b(textOutput("top_artist_1", inline = TRUE))),
-                          p(textOutput("num_of_listenings_top_artist_1", inline = TRUE))),
-
-                   column(2, offset = 1, class = "dummy",
-                          uiOutput("top_artist_2_image"),
-                          p(tags$b(textOutput("top_artist_2", inline = TRUE))),
-                          p(textOutput("num_of_listenings_top_artist_2", inline = TRUE))),
-
-                   column(2, offset = 1, class = "dummy",
-                          uiOutput("top_artist_3_image"),
-                          p(tags$b(textOutput("top_artist_3", inline = TRUE))),
-                          p(textOutput("num_of_listenings_top_artist_3", inline = TRUE)))
-
-                   ))),
-
-    fluidRow(
-        column(12, class = "dashboard_item",
-               fluidRow(
-
-                   column(8, offset = 2,
-                          h3("Top tracks"),
-                          hr()),
-
-                   column(2, offset = 2, class = "dummy",
-                          p(img(src = "images/album1.png", width = "80%")),
-                          p(tags$b(textOutput("top_track_title_1", inline = TRUE)),
-                            br(),
-                            textOutput("top_track_artist_1", inline = TRUE)),
-                          p(textOutput("num_of_listenings_top_track_1", inline = TRUE))),
-
-                   column(2, offset = 1, class = "dummy",
-                          p(img(src = "images/album2.png", width = "80%")),
-                          p(tags$b(textOutput("top_track_title_2", inline = TRUE)),
-                            br(),
-                            textOutput("top_track_artist_2", inline = TRUE)),
-                          p(textOutput("num_of_listenings_top_track_2", inline = TRUE))),
-
-                   column(2, offset = 1, class = "dummy",
-                          p(img(src = "images/album3.png", width = "80%")),
-                          p(tags$b(textOutput("top_track_title_3", inline = TRUE)),
-                            br(),
-                            textOutput("top_track_artist_3", inline = TRUE)),
-                          p(textOutput("num_of_listenings_top_track_3", inline = TRUE)))
-
-                   ))),
-
-    fluidRow(
-        column(12, class = "dashboard_item dummy",
-               column(2, offset = 1,
-                      br(),br(),
-                      p(tags$span(class = "big",textOutput("total_hours_played", inline = TRUE)),"hours"),
-                      p(tags$span(class = "big",textOutput("num_of_listenings", inline = TRUE)),"listenings"),
-                      p(tags$span(class = "big",textOutput("num_of_artists", inline = TRUE)),"artists"),
-                      p(tags$span(class = "big",textOutput("num_of_tracks", inline = TRUE)),"tracks")),
-               column(7, offset = 1,
-                      plotOutput(
-                          "plot_total_tracks_per_weekday",
-                          width = "100%")))
-    ),
-
-    fluidRow(
-        column(12, class = "dashboard_item dummy",
-               column(10, offset = 1,
-                      h3("How much you listened at each hour"),
-                      plotOutput(
-                          "plot_total_tracks_per_hour",
-                          width = "100%"),
-                      br(),
-                      selectInput("hour_plot_weekday", "day of the week", c("all", "weekdays", "weekends", "---", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))))
-    ),
-
-    fluidRow(
-        column(12, class = "dashboard_item dummy",
-               column(10, offset = 1,
-                      h3("How much you listened in each month"),
-                      plotOutput(
-                          "plot_total_tracks_per_month",
-                          width = "100%"),
-                      br(),
-                      selectInput("month_plot_year", "Year", c("All", "This year","Last year"))))
-    ),
-
-    fluidRow(
-        column(12, class = "dashboard_item dummy",
-               column(10, offset = 1,
-                      h3("Genres of your most played songs"),
-                      hr(),
-                      plotOutput(
-                          "plot_top_genres",
-                          width = "90%"),
-                      br()))
-    ),
-
-
-    fluidRow(
-        column(12, class = "dashboard_item dummy",
-               column(10, offset = 1,
-                      br(),
-                      h3("Audio features of your most played songs"),
-                      hr(),
-                      #p(img(src = "images/audio_features_spider_plot.png", width = "100%")),
-                      plotOutput(
-                          "plot_audio_features",
-                          width = "100%"),
-                      br(),
-                      p("A description of each feature you can find",
-                        tags$a(href="https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/","here") )))
-    ),
-
-    fluidRow(
-        column(12, class = "dashboard_item dummy",
-        column(8, offset = 2, class = "dummy",
-               h3("Quick facts"),
-               hr(),
-               p(textOutput("quick_fact_1", inline=TRUE)),
-               br(),
-               p(textOutput("quick_fact_2", inline=TRUE))))
-    ),
-
-
-    fluidRow(
-        column(8, offset = 2, class = "dummy",
-               br(),
-               br(),
-               br(),
-               p("Note: Tracks that were played less than 0.5 min have been excluded from this report to avoid taking into account possibly accidentally played songs."))
-    ),
+    includeCSS("styles.css"),
+    
+    uiOutput("ui_header"),
     
     fluidRow(
-        column(3, offset = 2,
-               hr(),
-               p("Ewelina Luczak 2020"))
-    )
+        column(8, offset = 4, class = "dummy",
+               fileInput(
+                   "input_file",
+                   "",
+                   multiple = TRUE,
+                   accept = ".json",
+                   buttonLabel = "Browse or drag file(s) here",
+                   placeholder = "No file selected",
+                   width = "50%"),
+               br())),
     
-))
+    #uiOutput("ui_date_range"),
+    uiOutput("ui_report_ready"),
+    uiOutput("ui_top_artists"),
+    uiOutput("ui_top_tracks"),
+    uiOutput("ui_summary"),
+    uiOutput("ui_hourly"),
+    uiOutput("ui_monthly"),
+    #uiOutput("ui_genres"),
+    #uiOutput("ui_audio_features"),
+    uiOutput("ui_quick_facts"),
+    uiOutput("ui_info"),
+    uiOutput("ui_author")
     
 ))
