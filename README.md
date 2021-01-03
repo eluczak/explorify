@@ -9,7 +9,8 @@ This is a dashboard web app that visualises your listening history in Spotify, *
 * top artists
 * top tracks
 * total count of artists, tracks, listened time
-* graphs that show your listening time hourly/monthly
+* graphs that show your listening time hourly/weekly/monthly
+* selecting a custom date range
 
 ## Requirements
 
