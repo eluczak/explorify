@@ -53,6 +53,7 @@ shinyServer(function(input, output) {
         data <- data[ which(data$msPlayed/60000>min_allowed_duration), ]
         
         # preparing columns
+        data$endTime <- as.POSIXct(data$endTime, format = "%Y-%m-%d %H:%M")
         data$minPlayed <- round(data$msPlayed/60000, 2)
         data$year <- substr(data$endTime, 1, 4)
         data$month <- substr(data$endTime, 6, 7)
@@ -63,12 +64,25 @@ shinyServer(function(input, output) {
         data$artistName <- data$artistName
         data$trackName <- data$trackName
         
+        # filtering date range of the report
+        data <- filter(data, endTime >= input$report_start_date, endTime <= input$report_end_date)
+        
         return(data)
     })
     
     #---------------------------------------------------------------------------
     # Functions
     #---------------------------------------------------------------------------
+    
+    get_dataset_start_date <- function()
+    {
+        return(substr(min(original_data()$endTime), 1,10))
+    }
+    
+    get_dataset_end_date <- function()
+    {
+        return(substr(max(original_data()$endTime), 1,10))
+    }
     
     get_top_genres <- function(num_of_top_artists, num_of_genres)
     {
@@ -391,11 +405,17 @@ shinyServer(function(input, output) {
         req(input$input_file)
         fluidRow(class = "main_area",
                  column(8, offset = 2,
-                        selectInput("date_range", "Date range",
-                                    c("All time" = "all_time",
-                                      "Last week" = "last_week",
-                                      "Last month" = "last_month",
-                                      "Last year" = "last_year"))))
+                        p("Date range in the uploaded file:",
+                          paste(get_dataset_start_date(),"-",get_dataset_end_date())),
+                        p("You can also select a date range of the report:"),
+                        dateInput('report_start_date',
+                                  label = 'enter start date',
+                                  value = get_dataset_start_date()
+                        ),
+                        dateInput('report_end_date',
+                                  label = 'enter end date',
+                                  value = get_dataset_end_date()
+                        )))
     })
     
     output$ui_top_artists <- renderUI({

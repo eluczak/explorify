@@ -17,8 +17,8 @@ shinyUI(fluidPage(
                    width = "50%"),
                br())),
     
-    #uiOutput("ui_date_range"),
     uiOutput("ui_report_ready"),
+    uiOutput("ui_date_range"),
     uiOutput("ui_top_artists"),
     uiOutput("ui_top_tracks"),
     uiOutput("ui_summary"),
