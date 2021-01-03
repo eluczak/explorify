@@ -6,7 +6,7 @@ shinyUI(fluidPage(
     uiOutput("ui_header"),
     
     fluidRow(
-        column(8, offset = 4, class = "dummy",
+        column(8, offset = 4,
                fileInput(
                    "input_file",
                    "",

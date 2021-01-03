@@ -291,7 +291,7 @@ shinyServer(function(input, output) {
                                 month = as.integer(data()$month))
         
         ggplot(dataframe, aes(x = month)) +
-            geom_bar(fill="#6198af84") +
+            geom_bar(fill="#aaaaaa", color="#555555") +
             theme_minimal() +
             theme(panel.grid.minor.x = element_blank()) +
             theme(panel.grid.major.x = element_blank()) +
@@ -299,7 +299,7 @@ shinyServer(function(input, output) {
             xlab("") +
             scale_x_continuous(breaks = seq(1,12), labels = month.name) +
             theme(legend.position='none')
-    })
+    }, bg="transparent")
     
     output$plot_total_tracks_per_weekday <- renderPlot({
         dataframe <- data.frame(endTime = data()$endTime, weekday = data()$weekday)
@@ -318,7 +318,7 @@ shinyServer(function(input, output) {
             geom_bar(width = 0.4, fill="#CB3E85") +
             theme(axis.title.y = element_blank()) +
             xlab("Total number of tracks")
-    }) 
+    }, bg="transparent")
     
     output$plot_audio_features <- renderPlot({
         top_tracks <- names(sort(table( paste(data()$trackName,data()$artistName, sep=";") ), decreasing=TRUE))
@@ -326,11 +326,11 @@ shinyServer(function(input, output) {
         top_tracks <- sub(";.*", "", top_tracks)
         songs_and_artists <- data.frame(trackName=top_tracks, artistName=top_artists, stringsAsFactors = FALSE)
         draw_plot_audio_features(songs_and_artists)
-    })
+    }, bg="transparent")
     
     output$plot_top_genres <- renderPlot({
         draw_plot_top_genres(plot_data=get_top_genres(30,15))
-    })
+    }, bg="transparent")
     
     output$draw_plot_hourly <- renderPlot({
         dataframe <- data.frame(endTime = as.POSIXct(data()$endTime, format = "%Y-%m-%d %H:%M"),
@@ -352,7 +352,7 @@ shinyServer(function(input, output) {
         
         smooth_line$x <- as.integer(smooth_line$x)
         plot <- ggplot(smooth_line, aes(x = x, y = y)) +
-            geom_line(colour="#ffaa55", size = 2) +
+            geom_line(colour="#dc9a1b", size = 2) +
             theme_minimal() +
             ylab("Total number of tracks") +
             xlab("") +
@@ -361,7 +361,7 @@ shinyServer(function(input, output) {
             scale_x_continuous(breaks = hours,labels =label_hours) +
             theme(axis.text.x = element_text(angle = -90, vjust = 0.5, hjust=1))
         return(plot)
-    })
+    }, bg="transparent")
     
     #---------------------------------------------------------------------------
     # UI elements
@@ -370,12 +370,12 @@ shinyServer(function(input, output) {
     output$ui_header <- renderUI({
         fluidRow(class = "main_area",
             column(8, offset = 2,
-                   br(),br(),br(),br(),br(),
-                   p(class="title","explorify"),
-                   p(class="subtitle","explore your listening history in Spotify",br(),"without the need to log in."),
                    br(),
-                   p(tags$b("Instructions: "),
-                     "Just upload a file named StreamingHistory*.json, for example \"StreamingHistory0.json\" which you can obtain from",tags$a(href="https://www.spotify.com/us/account/privacy/","Spotify website.")),
+                   p(class="title","explorify"),
+                   h3("view your Spotify listening statistics without the need to login"),
+                   br(),
+                   p(
+                     "You just need to upload a file (or files) named StreamingHistory*.json, which you can obtain from",tags$a(href="https://www.spotify.com/us/account/privacy/","Spotify website.")),
                    #p("Note: After upload, please wait a while. It may take up to one minute to load everything.")
                    ))
     })
@@ -402,19 +402,18 @@ shinyServer(function(input, output) {
         req(input$input_file)
         fluidRow(class = "dashboard_area",
                  column(8, offset = 2,
-                        h3("Top artists"),
-                        hr()),
+                        h3("Top artists")),
                  column(2, offset = 2,
                         #tags$img(src = get_top_artist_image_url(1), width = "100%", height = "100%"),
-                        p(tags$span(class = "big","1 "),tags$b(get_top_artist_name(1)),br(),
+                        p(span(class = "marked",tags$span(class = "big","1 "),tags$b(get_top_artist_name(1))),br(),
                           get_top_artist_num_of_listenings(1))),
                  column(2, offset = 1,
                         #tags$img(src = get_top_artist_image_url(2), width = "100%", height = "100%"),
-                        p(tags$span(class = "big","2 "),tags$b(get_top_artist_name(2)),br(),
+                        p(span(class = "marked",tags$span(class = "big","2 "),tags$b(get_top_artist_name(2))),br(),
                           get_top_artist_num_of_listenings(2))),
                  column(2, offset = 1,
                         #tags$img(src = get_top_artist_image_url(3), width = "100%", height = "100%"),
-                        p(tags$span(class = "big","3 "),tags$b(get_top_artist_name(3)),br(),
+                        p(span(class = "marked",tags$span(class = "big","3 "),tags$b(get_top_artist_name(3))),br(),
                           get_top_artist_num_of_listenings(3),br())))
     })
     
@@ -422,18 +421,17 @@ shinyServer(function(input, output) {
         req(input$input_file)
         fluidRow(class = "dashboard_area",
                  column(8, offset = 2,
-                        h3("Top tracks"),
-                        hr()),
+                        h3("Top tracks")),
                  column(2, offset = 2, 
-                        p(tags$span(class = "big","1 "),tags$b(get_top_track_name(1)),br(),
+                        p(span(class = "marked",tags$span(class = "big","1 "),tags$b(get_top_track_name(1))),br(),
                           get_top_track_artist_name(1),br(),
                           get_top_track_num_of_listenings(1))),
                  column(2, offset = 1,
-                        p(tags$span(class = "big","2 "),tags$b(get_top_track_name(2)),br(),
+                        p(span(class = "marked",tags$span(class = "big","2 "),tags$b(get_top_track_name(2))),br(),
                           get_top_track_artist_name(2),br(),
                           get_top_track_num_of_listenings(2))),
                  column(2, offset = 1,
-                        p(tags$span(class = "big","3 "),tags$b(get_top_track_name(3)),br(),
+                        p(span(class = "marked",tags$span(class = "big","3 "),tags$b(get_top_track_name(3))),br(),
                           get_top_track_artist_name(3),br(),
                           get_top_track_num_of_listenings(3))))
     })
@@ -481,7 +479,6 @@ shinyServer(function(input, output) {
         fluidRow(class = "dashboard_area",
                  column(10, offset = 1,
                         h3("Genres of your most played songs"),
-                        hr(),
                         plotOutput(
                             "plot_top_genres",
                             width = "90%"),
@@ -494,7 +491,6 @@ shinyServer(function(input, output) {
                  column(10, offset = 1,
                         br(),
                         h3("Audio features of your most played songs"),
-                        hr(),
                         #p(img(src = "images/audio_features_spider_plot.png", width = "100%")),
                         plotOutput(
                             "plot_audio_features",
@@ -510,19 +506,23 @@ shinyServer(function(input, output) {
         fluidRow(class = "dashboard_area",
                  column(8, offset = 2,
                         h3("Quick facts"),
-                        hr(),
-                        p(paste0("On ", day_max_mins_played()," you had been listening for a longest time, that is ",max_hours_played_per_day()," hours. ",
-                                 "They were mostly of ",top_artist_day_max_mins_played()," songs.")),
-                        br(),
-                        p(paste0("The longest track you listened to, was about ", longest_track_min_played()," minutes long. ",
-                                 "It was ",longest_track_name()," by ",longest_track_artist(),"."))))
+                        p(
+                          "Most active day:",
+                          span(class="marked",tags$b(day_max_mins_played())),
+                          paste0("(",max_hours_played_per_day()," hours)")),
+                        p(
+                            "Longest track:",
+                            span(class="marked",tags$b(longest_track_min_played(), "minutes")),
+                            paste0("(",longest_track_name()," - ",longest_track_artist(),")"))))
     })
     
     output$ui_info <- renderUI({
         req(input$input_file)
         fluidRow(class = "main_area",
+                 column(12,
+                        hr()),
                  column(8, offset = 2,
-                        p(class = "note",
+                        p(
                           "Note: Tracks that were played less than 0.5 min have been excluded from this report to avoid taking into account possibly accidentally played songs."))
         )
     })
