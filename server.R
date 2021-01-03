@@ -75,6 +75,11 @@ shinyServer(function(input, output) {
         # getting top artists' names
         top_artists_names <- character()
         for(i in 1:num_of_top_artists) {
+            # the following line is probably responsible for bad performance
+            # it calls ALL artists for "num_of_top_artists" times
+            # instead, there should be data-frame with artists sorted from most listened
+            # and we then get something like head(artists, limit=num_of_artists)
+            
             top_artists_names <- c(top_artists_names, 
                                    names(sort(table(data()$artistName), decreasing=TRUE)[i]))
         }
