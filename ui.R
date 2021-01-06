@@ -24,7 +24,7 @@ shinyUI(fluidPage(
     uiOutput("ui_summary"),
     uiOutput("ui_hourly"),
     uiOutput("ui_monthly"),
-    #uiOutput("ui_genres"),
+    uiOutput("ui_genres"),
     #uiOutput("ui_audio_features"),
     uiOutput("ui_quick_facts"),
     uiOutput("ui_info"),
