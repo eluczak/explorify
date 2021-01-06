@@ -397,8 +397,8 @@ shinyServer(function(input, output) {
     output$ui_top_artists <- renderUI({
         req(input$input_file)
         fluidRow(class = "dashboard_area",
-                 column(8, offset = 2,
-                        h3("Top artists")),
+                 column(10, offset = 1,
+                        h3("Top artists"),br(),br()),
                  column(2, offset = 2,
                         tags$img(src = get_top_artist_image_url(1), width = "100%", height = "100%"),
                         p(span(class = "marked",tags$span(class = "big","1 "),tags$b(get_top_artist_name(1))),br(),
@@ -416,8 +416,8 @@ shinyServer(function(input, output) {
     output$ui_top_tracks <- renderUI({
         req(input$input_file)
         fluidRow(class = "dashboard_area",
-                 column(8, offset = 2,
-                        h3("Top tracks")),
+                 column(10, offset = 1,
+                        h3("Top tracks"),br(),br()),
                  column(2, offset = 2, 
                         p(span(class = "marked",tags$span(class = "big","1 "),tags$b(get_top_track_name(1))),br(),
                           get_top_track_artist_name(1),br(),
@@ -500,7 +500,7 @@ shinyServer(function(input, output) {
     output$ui_quick_facts <- renderUI({
         req(input$input_file)
         fluidRow(class = "dashboard_area",
-                 column(8, offset = 2,
+                 column(10, offset = 1,
                         h3("Quick facts"),
                         p(
                           "Most active day:",
@@ -517,7 +517,7 @@ shinyServer(function(input, output) {
         fluidRow(class = "main_area",
                  column(12,
                         hr()),
-                 column(8, offset = 2,
+                 column(10, offset = 1,
                         p(
                           "Note: Tracks that were played less than 0.5 min have been excluded from this report to avoid taking into account possibly accidentally played songs."))
         )
@@ -525,7 +525,7 @@ shinyServer(function(input, output) {
     
     output$ui_author <- renderUI({
         fluidRow(class = "main_area",
-                 column(8, offset = 2,
+                 column(10, offset = 1,
                         p(class = "note", "Ewelina Luczak 2020")))
     })
     
