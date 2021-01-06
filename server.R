@@ -366,7 +366,7 @@ shinyServer(function(input, output) {
                    br(),
                    p(
                      "You just need to upload a file (or files) named StreamingHistory*.json, which you can obtain from",tags$a(href="https://www.spotify.com/us/account/privacy/","Spotify website.")),
-                   #p("Note: After upload, please wait a while. It may take up to one minute to load everything.")
+                   p("After upload, please wait a while. It may take up to one minute to load everything.")
                    ))
     })
     
