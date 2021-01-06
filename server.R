@@ -400,15 +400,15 @@ shinyServer(function(input, output) {
                  column(8, offset = 2,
                         h3("Top artists")),
                  column(2, offset = 2,
-                        #tags$img(src = get_top_artist_image_url(1), width = "100%", height = "100%"),
+                        tags$img(src = get_top_artist_image_url(1), width = "100%", height = "100%"),
                         p(span(class = "marked",tags$span(class = "big","1 "),tags$b(get_top_artist_name(1))),br(),
                           get_top_artist_num_of_listenings(1))),
                  column(2, offset = 1,
-                        #tags$img(src = get_top_artist_image_url(2), width = "100%", height = "100%"),
+                        tags$img(src = get_top_artist_image_url(2), width = "100%", height = "100%"),
                         p(span(class = "marked",tags$span(class = "big","2 "),tags$b(get_top_artist_name(2))),br(),
                           get_top_artist_num_of_listenings(2))),
                  column(2, offset = 1,
-                        #tags$img(src = get_top_artist_image_url(3), width = "100%", height = "100%"),
+                        tags$img(src = get_top_artist_image_url(3), width = "100%", height = "100%"),
                         p(span(class = "marked",tags$span(class = "big","3 "),tags$b(get_top_artist_name(3))),br(),
                           get_top_artist_num_of_listenings(3),br())))
     })
