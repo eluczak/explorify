@@ -86,41 +86,18 @@ shinyServer(function(input, output) {
     
     get_top_genres <- function(num_of_top_artists, num_of_genres)
     {
-        # getting top artists' names
-        top_artists_names <- character()
-        for(i in 1:num_of_top_artists) {
-            # the following line is probably responsible for bad performance
-            # it calls ALL artists for "num_of_top_artists" times
-            # instead, there should be data-frame with artists sorted from most listened
-            # and we then get something like head(artists, limit=num_of_artists)
-            
-            top_artists_names <- c(top_artists_names, 
-                                   names(sort(table(data()$artistName), decreasing=TRUE)[i]))
-        }
+        top_artists_names <- head(names(sort(table(data()$artistName), decreasing=TRUE)), num_of_top_artists)
         
-        # getting top artists' IDs
         top_artists_ids <- character()
+        top_genres <- character()
         for (i in 1:length(top_artists_names))
         {
             artist_name <- top_artists_names[i]
             artist_data <- search_spotify(artist_name, type="artist")
             artist_data <- head(artist_data[artist_data["name"]==artist_name,], 1)
-            top_artists_ids <- c(top_artists_ids, artist_data$id)
+            top_genres <- c(top_genres,artist_data$genres)
         }
-        
-        # getting top artists' genres
-        top_genres <- character()
-        for (i in 1:length(top_artists_ids))
-        {
-            URI <- paste0('https://api.spotify.com/v1/artists/', top_artists_ids[i])
-            response2 <- GET(url=URI, add_headers(Authorization = HeaderValue))
-            response2 <- content(response2)
-            top_genres <- c(top_genres, data.frame(genres=unlist(response2["genres"])))
-        }
-        
-        # vector with top genres (sorted most common first)
-        top_genres <- table(as.data.frame(unlist(top_genres)))
-        top_genres <- as.data.frame(top_genres)
+        top_genres <- as.data.frame(table(unlist(top_genres)))
         top_genres <- head(top_genres[order(-top_genres$Freq),], num_of_genres)
         return(top_genres)
     }
@@ -279,8 +256,8 @@ shinyServer(function(input, output) {
     
     draw_plot_top_genres <- function(plot_data)
     {
-        plot <- ggplot(plot_data, aes(x=Freq, y=reorder(Var1, Freq), fill=Freq, label=Freq)) +
-            geom_bar(stat="identity") +
+        plot <- ggplot(plot_data, aes(x=Freq, y=reorder(Var1, Freq), label=Freq)) +
+            geom_bar(stat="identity", fill="#c58d40", color="#896129", width = 0.5) +
             theme_minimal() +
             xlab("number of tracks labelled with a specific genre") +
             ylab("") +
@@ -289,8 +266,7 @@ shinyServer(function(input, output) {
                 position = position_dodge(0.9),
                 vjust = 0.3
             ) +
-            scale_fill_gradient(low = "#00baff", high = "orangered") +
-            theme(axis.text.x = element_blank(), 
+            theme(axis.text.x = element_blank(),
                   axis.ticks.x = element_blank(),
                   panel.grid.major.x = element_blank(),
                   panel.grid.minor.x = element_blank(),
@@ -343,7 +319,7 @@ shinyServer(function(input, output) {
     }, bg="transparent")
     
     output$plot_top_genres <- renderPlot({
-        draw_plot_top_genres(plot_data=get_top_genres(30,15))
+        draw_plot_top_genres(plot_data=get_top_genres(10,10))
     }, bg="transparent")
     
     output$draw_plot_hourly <- renderPlot({
