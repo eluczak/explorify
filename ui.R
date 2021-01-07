@@ -17,15 +17,16 @@ shinyUI(fluidPage(
                    width = "50%"),
                br())),
     
-    uiOutput("ui_report_ready"),
+    
     uiOutput("ui_date_range"),
+    uiOutput("ui_warning_no_data"),
     uiOutput("ui_top_artists"),
     uiOutput("ui_top_tracks"),
     uiOutput("ui_summary"),
     uiOutput("ui_hourly"),
     uiOutput("ui_monthly"),
     uiOutput("ui_genres"),
-    #uiOutput("ui_audio_features"),
+    # uiOutput("ui_audio_features"),
     uiOutput("ui_quick_facts"),
     uiOutput("ui_info"),
     uiOutput("ui_author")
