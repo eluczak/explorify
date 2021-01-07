@@ -259,13 +259,20 @@ shinyServer(function(input, output) {
     
     draw_plot_top_genres <- function(plot_data)
     {
-        plot <- ggplot(plot_data, aes(x=Freq, y=reorder(Var1, Freq), label=Freq)) +
-            geom_bar(stat="identity", fill="#c58d40", color="#896129", width = 0.5) +
+        sum_frequencies <- sum(plot_data$Freq)
+        plot <- ggplot(plot_data, aes(x=Freq/sum_frequencies,
+                                      y=reorder(Var1, Freq/sum_frequencies),
+                                      label=Freq/sum_frequencies)) +
+            geom_bar(aes(x=1,
+                         y=reorder(Var1, Freq/sum_frequencies)),
+                     stat="identity", fill="#f3f6f3", color="#f3f6f3", width = 0.7) +
+            geom_bar(stat="identity", fill="#c0ff02", color="#5b7200", width = 0.7) +
             theme_minimal() +
-            xlab("number of tracks labelled with a specific genre") +
+            xlab("% of tracks labelled with a specific genre") +
             ylab("") +
+            xlim(0,1) +
             geom_text(
-                aes(label = Freq, x = 0.5),
+                aes(label = paste0(round(Freq/sum_frequencies*100,0),"%"), x = 0.03),
                 position = position_dodge(0.9),
                 vjust = 0.3
             ) +
