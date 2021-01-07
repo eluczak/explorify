@@ -322,7 +322,9 @@ shinyServer(function(input, output) {
     }, bg="transparent")
     
     output$plot_top_genres <- renderPlot({
-        draw_plot_top_genres(plot_data=get_top_genres(10,10))
+        num_of_input_tracks = 10
+        num_of_output_genres = 10
+        draw_plot_top_genres(plot_data=get_top_genres(num_of_input_tracks,num_of_output_genres))
     }, bg="transparent")
     
     output$draw_plot_hourly <- renderPlot({
