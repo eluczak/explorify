@@ -375,11 +375,20 @@ shinyServer(function(input, output) {
                    ))
     })
     
-    output$ui_report_ready <- renderUI({
+    is_data_available <- reactive({
+        if ( length(data()$endTime) > 0 ) TRUE else FALSE
+    })
+    
+    output$ui_warning_no_data <- renderUI({
         req(input$input_file)
-        fluidRow(class = "main_area",
-                 column(7, offset = 5,
-                        p(class = "ready", "report is ready, scroll down")))
+        if(is_data_available() == FALSE)
+        {
+            fluidRow(class = "main_area",
+                     column(8, offset = 2,
+                            tags$div(class="alert alert-warning", "There is no (enough) data within selected period.")
+                     ))
+        }
+        
     })
     
     output$ui_date_range <- renderUI({
@@ -388,144 +397,162 @@ shinyServer(function(input, output) {
                  column(8, offset = 2,
                         p("Date range in the uploaded file:",
                           paste(get_dataset_start_date(),"-",get_dataset_end_date())),
-                        p("You can also select a date range of the report:"),
+                        p("Select reporting range:"),
                         dateInput('report_start_date',
-                                  label = 'enter start date',
+                                  label = 'From',
                                   value = get_dataset_start_date()
                         ),
                         dateInput('report_end_date',
-                                  label = 'enter end date',
+                                  label = 'To',
                                   value = get_dataset_end_date()
                         )))
     })
     
     output$ui_top_artists <- renderUI({
-        req(input$input_file)
-        fluidRow(class = "dashboard_area",
-                 column(10, offset = 1,
-                        h3("Top artists"),br(),br()),
-                 column(2, offset = 2,
-                        tags$img(src = get_top_artist_image_url(1), width = "100%", height = "100%"),
-                        p(span(class = "marked",tags$span(class = "big","1 "),tags$b(get_top_artist_name(1))),br(),
-                          get_top_artist_num_of_listenings(1))),
-                 column(2, offset = 1,
-                        tags$img(src = get_top_artist_image_url(2), width = "100%", height = "100%"),
-                        p(span(class = "marked",tags$span(class = "big","2 "),tags$b(get_top_artist_name(2))),br(),
-                          get_top_artist_num_of_listenings(2))),
-                 column(2, offset = 1,
-                        tags$img(src = get_top_artist_image_url(3), width = "100%", height = "100%"),
-                        p(span(class = "marked",tags$span(class = "big","3 "),tags$b(get_top_artist_name(3))),br(),
-                          get_top_artist_num_of_listenings(3),br())))
+        if(is_data_available())
+        {
+            fluidRow(class = "dashboard_area",
+                     column(10, offset = 1,
+                            h3("Top artists"),br(),br()),
+                     column(2, offset = 2,
+                            tags$img(src = get_top_artist_image_url(1), width = "100%", height = "100%"),
+                            p(span(class = "marked",tags$span(class = "big","1 "),tags$b(get_top_artist_name(1))),br(),
+                              get_top_artist_num_of_listenings(1))),
+                     column(2, offset = 1,
+                            tags$img(src = get_top_artist_image_url(2), width = "100%", height = "100%"),
+                            p(span(class = "marked",tags$span(class = "big","2 "),tags$b(get_top_artist_name(2))),br(),
+                              get_top_artist_num_of_listenings(2))),
+                     column(2, offset = 1,
+                            tags$img(src = get_top_artist_image_url(3), width = "100%", height = "100%"),
+                            p(span(class = "marked",tags$span(class = "big","3 "),tags$b(get_top_artist_name(3))),br(),
+                              get_top_artist_num_of_listenings(3),br())))
+        }
     })
     
     output$ui_top_tracks <- renderUI({
-        req(input$input_file)
-        fluidRow(class = "dashboard_area",
-                 column(10, offset = 1,
-                        h3("Top tracks"),br(),br()),
-                 column(2, offset = 2, 
-                        p(span(class = "marked",tags$span(class = "big","1 "),tags$b(get_top_track_name(1))),br(),
-                          get_top_track_artist_name(1),br(),
-                          get_top_track_num_of_listenings(1))),
-                 column(2, offset = 1,
-                        p(span(class = "marked",tags$span(class = "big","2 "),tags$b(get_top_track_name(2))),br(),
-                          get_top_track_artist_name(2),br(),
-                          get_top_track_num_of_listenings(2))),
-                 column(2, offset = 1,
-                        p(span(class = "marked",tags$span(class = "big","3 "),tags$b(get_top_track_name(3))),br(),
-                          get_top_track_artist_name(3),br(),
-                          get_top_track_num_of_listenings(3))))
+        if(is_data_available())
+        {
+            fluidRow(class = "dashboard_area",
+                     column(10, offset = 1,
+                            h3("Top tracks"),br(),br()),
+                     column(2, offset = 2, 
+                            p(span(class = "marked",tags$span(class = "big","1 "),tags$b(get_top_track_name(1))),br(),
+                              get_top_track_artist_name(1),br(),
+                              get_top_track_num_of_listenings(1))),
+                     column(2, offset = 1,
+                            p(span(class = "marked",tags$span(class = "big","2 "),tags$b(get_top_track_name(2))),br(),
+                              get_top_track_artist_name(2),br(),
+                              get_top_track_num_of_listenings(2))),
+                     column(2, offset = 1,
+                            p(span(class = "marked",tags$span(class = "big","3 "),tags$b(get_top_track_name(3))),br(),
+                              get_top_track_artist_name(3),br(),
+                              get_top_track_num_of_listenings(3))))
+        }
     })
     
     output$ui_summary <- renderUI({
-        req(input$input_file)
-        fluidRow(class = "dashboard_area",
-                 column(2, offset = 1,
-                        br(),br(),
-                        p(tags$span(class = "big",total_hours()),br(),"hours",br()),
-                        p(tags$span(class = "big",total_listenings()),br(),"listenings",br()),
-                        p(tags$span(class = "big",total_artists()),br(),"artists",br()),
-                        p(tags$span(class = "big",total_tracks()),br(),"unique tracks")),
-                 column(7, offset = 1,
-                        plotOutput(
-                            "plot_total_tracks_per_weekday",
-                            width = "100%")))
+        if(is_data_available())
+        {
+            fluidRow(class = "dashboard_area",
+                     column(2, offset = 1,
+                            br(),br(),
+                            p(tags$span(class = "big",total_hours()),br(),"hours",br()),
+                            p(tags$span(class = "big",total_listenings()),br(),"listenings",br()),
+                            p(tags$span(class = "big",total_artists()),br(),"artists",br()),
+                            p(tags$span(class = "big",total_tracks()),br(),"unique tracks")),
+                     column(7, offset = 1,
+                            plotOutput(
+                                "plot_total_tracks_per_weekday",
+                                width = "100%")))
+        }
     })
     
     output$ui_hourly <- renderUI({
-        req(input$input_file)
-        fluidRow(class = "dashboard_area",
-                 column(10, offset = 1,
-                        h3("How much you listened at each hour"),
-                        plotOutput(
-                            "draw_plot_hourly",
-                            width = "100%"),
-                        br()))
+        if(is_data_available())
+        {
+            fluidRow(class = "dashboard_area",
+                     column(10, offset = 1,
+                            h3("How much you listened at each hour"),
+                            plotOutput(
+                                "draw_plot_hourly",
+                                width = "100%"),
+                            br()))
+        }
     })
     
     output$ui_monthly <- renderUI({
-        req(input$input_file)
-        fluidRow(class = "dashboard_area",
-                 column(10, offset = 1,
-                        h3("How much you listened in each month"),
-                        plotOutput(
-                            "plot_total_tracks_per_month",
-                            width = "100%"),
-                        br()))
+        if(is_data_available())
+        {
+            fluidRow(class = "dashboard_area",
+                     column(10, offset = 1,
+                            h3("How much you listened in each month"),
+                            plotOutput(
+                                "plot_total_tracks_per_month",
+                                width = "100%"),
+                            br()))
+        }
         
     })
     
     output$ui_genres <- renderUI({
-        req(input$input_file)
-        fluidRow(class = "dashboard_area",
-                 column(10, offset = 1,
-                        h3("Genres of your most played songs"),
-                        plotOutput(
-                            "plot_top_genres",
-                            width = "90%"),
-                        br()))
+        if(is_data_available())
+        {
+            fluidRow(class = "dashboard_area",
+                     column(10, offset = 1,
+                            h3("Genres of your most played songs"),
+                            plotOutput(
+                                "plot_top_genres",
+                                width = "90%"),
+                            br()))
+        }
     })
     
     output$ui_audio_features <- renderUI({
-        req(input$input_file)
-        fluidRow(class = "dashboard_area",
-                 column(10, offset = 1,
-                        br(),
-                        h3("Audio features of your most played songs"),
-                        #p(img(src = "images/audio_features_spider_plot.png", width = "100%")),
-                        plotOutput(
-                            "plot_audio_features",
-                            width = "100%"),
-                        br(),
-                        p("A description of each feature you can find",
-                          tags$a(href="https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/",
-                                 "here"))))
+        if(is_data_available())
+        {
+            fluidRow(class = "dashboard_area",
+                     column(10, offset = 1,
+                            br(),
+                            h3("Audio features of your most played songs"),
+                            #p(img(src = "images/audio_features_spider_plot.png", width = "100%")),
+                            plotOutput(
+                                "plot_audio_features",
+                                width = "100%"),
+                            br(),
+                            p("A description of each feature you can find",
+                              tags$a(href="https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/",
+                                     "here"))))
+        }
     })
     
     output$ui_quick_facts <- renderUI({
-        req(input$input_file)
-        fluidRow(class = "dashboard_area",
-                 column(10, offset = 1,
-                        h3("Quick facts"),
-                        p(
-                          "Most active day:",
-                          span(class="marked",tags$b(day_max_mins_played())),
-                          paste0("(",max_hours_played_per_day()," hours)")),
-                        p(
-                            "Longest track:",
-                            span(class="marked",tags$b(longest_track_min_played(), "minutes")),
-                            paste0("(",longest_track_name()," - ",longest_track_artist(),")"))))
+        if(is_data_available())
+        {
+            fluidRow(class = "dashboard_area",
+                     column(10, offset = 1,
+                            h3("Quick facts"),
+                            p(
+                                "Most active day:",
+                                span(class="marked",tags$b(day_max_mins_played())),
+                                paste0("(",max_hours_played_per_day()," hours)")),
+                            p(
+                                "Longest track:",
+                                span(class="marked",tags$b(longest_track_min_played(), "minutes")),
+                                paste0("(",longest_track_name()," - ",longest_track_artist(),")"))))
+        }
     })
     
     output$ui_info <- renderUI({
-        req(input$input_file)
-        fluidRow(class = "main_area",
-                 column(12,
-                        hr()),
-                 column(10, offset = 1,
-                        p(
-                          "Note: Tracks that were played less than 0.5 min have been excluded from this report to avoid taking into account possibly accidentally played songs."))
-        )
+        if(is_data_available())
+        {
+            fluidRow(class = "main_area",
+                     column(12,
+                            hr()),
+                     column(10, offset = 1,
+                            p(
+                                "Note: Tracks that were played less than 0.5 min have been excluded from this report to avoid taking into account possibly accidentally played songs."))
+            )
+        }
     })
     
     output$ui_author <- renderUI({
