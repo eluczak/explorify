@@ -64,9 +64,12 @@ shinyServer(function(input, output) {
         data$artistName <- data$artistName
         data$trackName <- data$trackName
         
-        # filtering date range of the report
-        data <- filter(data, endTime >= input$report_start_date, endTime <= input$report_end_date)
-        
+        # limiting date range of the report
+        data <- data[which(as.POSIXct(substr(data$endTime,1,10), format = "%Y-%m-%d") >=
+                                     as.POSIXct(substr(input$report_start_date,1,10), format = "%Y-%m-%d")), ]
+        data <- data[which(as.POSIXct(substr(data$endTime,1,10), format = "%Y-%m-%d") <=
+                                     as.POSIXct(substr(input$report_end_date,1,10), format = "%Y-%m-%d")), ] 
+
         return(data)
     })
     
