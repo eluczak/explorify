@@ -15,12 +15,6 @@ This is a dashboard web app that visualises your listening history in Spotify, *
 
 
 
-## Requirements
-
--to be added soon-
-
-
-
 ## Instructions
 
 **Running locally:**
