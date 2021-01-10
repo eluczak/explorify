@@ -26,3 +26,7 @@ Then, uncomment and populate lines regarding `client_id` and `client_secret` in 
 **Using the app:**
 
 You just have to upload a file named *StreamingHistory\*.json*, which you can obtain from [Spotify website](https://www.spotify.com/us/account/privacy/). The file contains your streaming history for the past year. If you have received more files, e.g. *StreamingHistory0*, *StreamingHistory1* etc., combine them into single JSON file in a text editor before upload.
+
+
+
+You can see the app at [eluczak.shinyapps.io/explorify](https://eluczak.shinyapps.io/explorify).
