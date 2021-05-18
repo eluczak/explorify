@@ -373,12 +373,10 @@ shinyServer(function(input, output) {
         fluidRow(class = "main_area",
             column(8, offset = 2,
                    br(),
-                   p(class="title","explorify"),
-                   h3("view your Spotify listening statistics without the need to login"),
+                   h1(class="title","discover your Spotify listening habits"),
                    br(),
-                   p(
-                     "You just need to upload a file (or files) named StreamingHistory*.json, which you can obtain from",tags$a(href="https://www.spotify.com/us/account/privacy/","Spotify website.")),
-                   p("After upload, please wait a while. It may take up to one minute to load everything.")
+                   p("Just upload a file (or files) named StreamingHistory*.json, which you can obtain from",tags$a(href="https://www.spotify.com/us/account/privacy/","Spotify website.")),
+                   p("After upload, please wait a while. It may take up to one minute to generate reports.")
                    ))
     })
     
@@ -565,7 +563,7 @@ shinyServer(function(input, output) {
     output$ui_author <- renderUI({
         fluidRow(class = "main_area",
                  column(10, offset = 1,
-                        p(class = "note", "Ewelina Luczak 2020")))
+                        p(class = "note", "Ewelina Luczak 2021")))
     })
     
 })
