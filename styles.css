@@ -31,7 +31,10 @@ hr {
 }
 
 .title {
-  color: #78288f
+  font-weight: bold;
+  background-image: linear-gradient(45deg, #f11993, #f4bf1f);
+  background-clip: text;
+  color: transparent;
 }
 
 .subtitle {
