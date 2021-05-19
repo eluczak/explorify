@@ -380,6 +380,21 @@ shinyServer(function(input, output) {
                    ))
     })
     
+    output$ui_file_upload <- renderUI({
+        fluidRow(
+            column(8, offset = 4,
+                   fileInput(
+                       "input_file",
+                       "",
+                       multiple = TRUE,
+                       accept = ".json",
+                       buttonLabel = "Browse or drag file(s) here",
+                       placeholder = "No file selected",
+                       width = "50%"),
+                   br()))
+    })
+    
+    
     is_data_available <- reactive({
         if ( length(data()$endTime) > 0 ) TRUE else FALSE
     })
@@ -561,9 +576,13 @@ shinyServer(function(input, output) {
     })
     
     output$ui_author <- renderUI({
-        fluidRow(class = "main_area",
-                 column(10, offset = 1,
-                        p(class = "note", "Ewelina Luczak 2021")))
+        if(is_data_available())
+        {
+            fluidRow(class = "main_area",
+                     column(10, offset = 1,
+                            p(class = "note", "Ewelina Luczak 2021")))
+        }
+        
     })
     
 })

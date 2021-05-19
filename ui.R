@@ -4,20 +4,7 @@ shinyUI(fluidPage(
     includeCSS("styles.css"),
     
     uiOutput("ui_header"),
-    
-    fluidRow(
-        column(8, offset = 4,
-               fileInput(
-                   "input_file",
-                   "",
-                   multiple = TRUE,
-                   accept = ".json",
-                   buttonLabel = "Browse or drag file(s) here",
-                   placeholder = "No file selected",
-                   width = "50%"),
-               br())),
-    
-    
+    uiOutput("ui_file_upload"),
     uiOutput("ui_date_range"),
     uiOutput("ui_warning_no_data"),
     uiOutput("ui_top_artists"),
