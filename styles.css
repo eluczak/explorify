@@ -31,7 +31,8 @@ hr {
 }
 
 .title {
-  background: -webkit-linear-gradient(-70deg,#db469f,#2188ff);
+  font-weight: bold;
+  background: -webkit-linear-gradient(-70deg,#f11993,#f4bf1f);
     background-clip: border-box;
   -webkit-background-clip: text;
   background-clip: text;
