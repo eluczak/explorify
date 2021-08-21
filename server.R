@@ -38,10 +38,14 @@ shinyServer(function(input, output) {
     
     original_data <- reactive({
         req(input$input_file)
-        path <- input$input_file
-        path <- path$datapath
-        original_data <- fromJSON(path, simplifyVector = TRUE)
-        return(original_data)
+        # path <- input$input_file$datapath
+        # original_data <- fromJSON(path, simplifyVector = TRUE)
+        # return(original_data)
+        
+        x <- input$input_file$datapath
+        rbindlist(lapply(x, function(x) {fromJSON(x, flatten = TRUE)}),
+                  use.names = TRUE, fill = TRUE)
+
     })
     
     data <- reactive({
